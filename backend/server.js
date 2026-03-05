@@ -28,4 +28,10 @@ app.get('/',(req,res)=>{
     res.send("API Working")
 })
 
-app.listen(port, ()=> console.log('Server started on PORT : '+ port))
+// Export for Vercel serverless
+export default app
+
+// Start server when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+    app.listen(port, () => console.log('Server started on PORT : ' + port))
+}
