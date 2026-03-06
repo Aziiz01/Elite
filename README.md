@@ -147,4 +147,4 @@ npm run dev
 
 ## License
 
-ISC
+Mohamed Aziz Nacib
