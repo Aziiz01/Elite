@@ -23,32 +23,33 @@ const ShopContextProvider = (props) => {
     const navigate = useNavigate();
 
 
-    const addToCart = async (itemId, size) => {
+    const addToCart = async (itemId, color, quantity = 1) => {
 
-        if (!size) {
-            toast.error('Select Product Size');
+        if (!color) {
+            toast.error('Select a color');
             return;
         }
 
+        const qty = Math.max(1, Number(quantity) || 1);
         let cartData = structuredClone(cartItems);
 
         if (cartData[itemId]) {
-            if (cartData[itemId][size]) {
-                cartData[itemId][size] += 1;
+            if (cartData[itemId][color]) {
+                cartData[itemId][color] += qty;
             }
             else {
-                cartData[itemId][size] = 1;
+                cartData[itemId][color] = qty;
             }
         }
         else {
             cartData[itemId] = {};
-            cartData[itemId][size] = 1;
+            cartData[itemId][color] = qty;
         }
         setCartItems(cartData);
 
         if (token) {
             try {
-                await addToCartApi({ itemId, size }, token)
+                await addToCartApi({ itemId, color, quantity: qty }, token)
             } catch (error) {
                 console.log(error)
                 toast.error(error?.response?.data?.message || error.message)
@@ -73,17 +74,17 @@ const ShopContextProvider = (props) => {
         return totalCount;
     }
 
-    const updateQuantity = async (itemId, size, quantity) => {
+    const updateQuantity = async (itemId, color, quantity) => {
 
         let cartData = structuredClone(cartItems);
 
-        cartData[itemId][size] = quantity;
+        cartData[itemId][color] = quantity;
 
         setCartItems(cartData)
 
         if (token) {
             try {
-                await updateCartApi({ itemId, size, quantity }, token)
+                await updateCartApi({ itemId, color, quantity }, token)
             } catch (error) {
                 console.log(error)
                 toast.error(error?.response?.data?.message || error.message)
@@ -95,15 +96,15 @@ const ShopContextProvider = (props) => {
     const getCartAmount = () => {
         let totalAmount = 0;
         for (const items in cartItems) {
-            let itemInfo = products.find((product) => product._id === items);
+            const itemInfo = products.find((product) => product._id === items);
+            if (!itemInfo) continue;
+            const displayPrice = (itemInfo.newPrice != null && itemInfo.newPrice !== '') ? itemInfo.newPrice : itemInfo.price;
             for (const item in cartItems[items]) {
                 try {
                     if (cartItems[items][item] > 0) {
-                        totalAmount += itemInfo.price * cartItems[items][item];
+                        totalAmount += displayPrice * cartItems[items][item];
                     }
-                } catch (error) {
-
-                }
+                } catch (error) {}
             }
         }
         return totalAmount;

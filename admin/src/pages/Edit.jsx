@@ -4,6 +4,7 @@ import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import { CATEGORIES, SUBCATEGORIES } from '../constants/productOptions'
 
 const Edit = ({ token }) => {
   const { id } = useParams()
@@ -19,8 +20,8 @@ const Edit = ({ token }) => {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [newPrice, setNewPrice] = useState("")
-  const [category, setCategory] = useState("Men")
-  const [subCategory, setSubCategory] = useState("Topwear")
+  const [category, setCategory] = useState(CATEGORIES[0])
+  const [subCategory, setSubCategory] = useState(SUBCATEGORIES[0])
   const [bestseller, setBestseller] = useState(false)
   const [inStock, setInStock] = useState(true)
   const [colors, setColors] = useState([])
@@ -53,8 +54,8 @@ const Edit = ({ token }) => {
           setDescription(p.description || "")
           setPrice(p.price?.toString() || "")
           setNewPrice(p.newPrice != null && p.newPrice !== '' ? p.newPrice.toString() : "")
-          setCategory(p.category || "Men")
-          setSubCategory(p.subCategory || "Topwear")
+          setCategory(CATEGORIES.includes(p.category) ? p.category : CATEGORIES[0])
+          setSubCategory(SUBCATEGORIES.includes(p.subCategory) ? p.subCategory : SUBCATEGORIES[0])
           setBestseller(p.bestseller || false)
           setInStock(p.inStock !== false)
           const loadedColors = Array.isArray(p.colors) ? p.colors : []
@@ -160,17 +161,17 @@ const Edit = ({ token }) => {
         <div>
           <p className='mb-2'>Product category</p>
           <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2' value={category}>
-            <option value="Men">Men</option>
-            <option value="Women">Women</option>
-            <option value="Kids">Kids</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
         </div>
         <div>
           <p className='mb-2'>Sub category</p>
           <select onChange={(e) => setSubCategory(e.target.value)} className='w-full px-3 py-2' value={subCategory}>
-            <option value="Topwear">Topwear</option>
-            <option value="Bottomwear">Bottomwear</option>
-            <option value="Winterwear">Winterwear</option>
+            {SUBCATEGORIES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
           </select>
         </div>
         <div>

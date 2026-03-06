@@ -3,6 +3,7 @@ import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import { CATEGORIES, SUBCATEGORIES } from '../constants/productOptions'
 
 const Add = ({ token }) => {
 
@@ -15,8 +16,8 @@ const Add = ({ token }) => {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [newPrice, setNewPrice] = useState("")
-  const [category, setCategory] = useState("Men")
-  const [subCategory, setSubCategory] = useState("Topwear")
+  const [category, setCategory] = useState(CATEGORIES[0])
+  const [subCategory, setSubCategory] = useState(SUBCATEGORIES[0])
   const [bestseller, setBestseller] = useState(false)
   const [inStock, setInStock] = useState(true)
   const [colors, setColors] = useState([])
@@ -127,18 +128,18 @@ const Add = ({ token }) => {
         <div>
           <p className='mb-2'>Product category</p>
           <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2' value={category}>
-            <option value="Lèvres">Lèvres</option>
-            <option value="Teint">Teint</option>
-            <option value="Yeux">Yeux</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
         </div>
 
         <div>
           <p className='mb-2'>Sub category</p>
           <select onChange={(e) => setSubCategory(e.target.value)} className='w-full px-3 py-2' value={subCategory}>
-            <option value="Gloss">Gloss</option>
-            <option value="Eye Liner">Eye Liner</option>
-            <option value="Poudres">Poudres</option>
+            {SUBCATEGORIES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
           </select>
         </div>
 
