@@ -5,7 +5,8 @@ import userModel from "../models/userModel.js"
 const addToCart = async (req,res) => {
     try {
         
-        const { userId, itemId, color } = req.body
+        const { userId, itemId, color, quantity: qty } = req.body
+        const addQty = Math.max(1, Number(qty) || 1)
 
         if (!itemId || !color) {
             return res.json({ success: false, message: "itemId and color are required" })
@@ -16,13 +17,13 @@ const addToCart = async (req,res) => {
 
         if (cartData[itemId]) {
             if (cartData[itemId][color]) {
-                cartData[itemId][color] += 1
+                cartData[itemId][color] += addQty
             } else {
-                cartData[itemId][color] = 1
+                cartData[itemId][color] = addQty
             }
         } else {
             cartData[itemId] = {}
-            cartData[itemId][color] = 1
+            cartData[itemId][color] = addQty
         }
 
         await userModel.findByIdAndUpdate(userId, { cartData })

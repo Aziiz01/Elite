@@ -52,13 +52,17 @@ const Orders = () => {
               orderData.map((item,index) => (
                 <div key={index} className='py-4 border-t border-b text-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
                     <div className='flex items-start gap-6 text-sm'>
-                        <img className='w-16 sm:w-20' src={item.image[0]} alt="" />
+                        <img className='w-16 sm:w-20 object-cover' src={item.image?.[0]} alt={item.name} />
                         <div>
                           <p className='sm:text-base font-medium'>{item.name}</p>
-                          <div className='flex items-center gap-3 mt-1 text-base text-gray-700'>
-                            <p>{currency}{item.price}</p>
+                          <div className='flex items-center gap-3 mt-1 text-base text-gray-700 flex-wrap'>
+                            <p>{currency}{(item.newPrice != null && item.newPrice !== '') ? item.newPrice : item.price}</p>
                             <p>Quantity: {item.quantity}</p>
-                            <p>Size: {item.size}</p>
+                            {item.color && (
+                              <span className='inline-flex items-center gap-1'>
+                                <span className='w-5 h-5 rounded-full border border-gray-300 flex-shrink-0' style={{ backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(item.color) ? item.color : '#9ca3af' }} title={item.color} />
+                              </span>
+                            )}
                           </div>
                           <p className='mt-1'>Date: <span className=' text-gray-400'>{new Date(item.date).toDateString()}</span></p>
                           <p className='mt-1'>Payment: <span className=' text-gray-400'>{item.paymentMethod}</span></p>

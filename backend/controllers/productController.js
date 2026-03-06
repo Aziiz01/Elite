@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary"
 import productModel from "../models/productModel.js"
+import reviewModel from "../models/reviewModel.js"
 
 // function for add product
 const addProduct = async (req, res) => {
@@ -112,9 +113,16 @@ const singleProduct = async (req, res) => {
         if (!product) {
             return res.json({ success: false, message: "Product not found" })
         }
-        // Ensure displayPrice available: use newPrice if set, else price
+
+        const reviews = await reviewModel
+            .find({ productId })
+            .populate("userId", "firstName lastName")
+            .sort({ createdAt: -1 })
+            .lean()
+
         const productObj = product.toObject()
         productObj.displayPrice = product.newPrice ?? product.price
+        productObj.reviews = reviews
         res.json({ success: true, product: productObj })
 
     } catch (error) {

@@ -19,6 +19,9 @@ export const registerUser = (data) =>
 export const loginUser = (data) =>
   api.post('/api/user/login', data);
 
+export const getUserProfile = (token) =>
+  api.post('/api/user/profile', {}, withAuth(token));
+
 // Product APIs
 export const getProducts = () =>
   api.get('/api/product/list');
@@ -33,9 +36,12 @@ export const updateCartApi = (data, token) =>
 export const getCart = (token) =>
   api.post('/api/cart/get', {}, withAuth(token));
 
-// Order APIs (require token)
+// Order APIs
 export const placeOrder = (orderData, token) =>
   api.post('/api/order/place', orderData, withAuth(token));
+
+export const placeGuestOrder = (orderData) =>
+  api.post('/api/order/place-guest', orderData);
 
 export const createStripeOrder = (orderData, token) =>
   api.post('/api/order/stripe', orderData, withAuth(token));
@@ -51,5 +57,18 @@ export const verifyRazorpayPayment = (data, token) =>
 
 export const getUserOrders = (token) =>
   api.post('/api/order/userorders', {}, withAuth(token));
+
+// Review APIs
+export const getProductReviews = (productId) =>
+  api.post('/api/review/product', { productId });
+
+export const createReview = (data, token) =>
+  api.post('/api/review/create', data, withAuth(token));
+
+export const updateReviewApi = (data, token) =>
+  api.post('/api/review/update', data, withAuth(token));
+
+export const deleteReviewApi = (data, token) =>
+  api.post('/api/review/delete', data, withAuth(token));
 
 export { BASE_URL as backendUrl };

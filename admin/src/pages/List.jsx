@@ -1,13 +1,20 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
+import { CATEGORIES, SUBCATEGORIES } from '../constants/productOptions'
 
 const List = ({ token }) => {
 
   const [list, setList] = useState([])
   const [expandedDesc, setExpandedDesc] = useState({})
+  const [searchName, setSearchName] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+  const [filterSubCategory, setFilterSubCategory] = useState('')
+  const [filterInStock, setFilterInStock] = useState('')
+  const [filterPriceMin, setFilterPriceMin] = useState('')
+  const [filterPriceMax, setFilterPriceMax] = useState('')
 
   const toggleDesc = (id) => {
     setExpandedDesc(prev => ({ ...prev, [id]: !prev[id] }))
@@ -62,6 +69,25 @@ const List = ({ token }) => {
     )
   }
 
+  const filteredList = useMemo(() => {
+    return list.filter((item) => {
+      if (searchName.trim()) {
+        const q = searchName.trim().toLowerCase()
+        if (!(item.name || '').toLowerCase().includes(q)) return false
+      }
+      if (filterCategory && item.category !== filterCategory) return false
+      if (filterSubCategory && item.subCategory !== filterSubCategory) return false
+      if (filterInStock === 'yes' && item.inStock === false) return false
+      if (filterInStock === 'no' && item.inStock !== false) return false
+      const price = item.newPrice ?? item.price
+      const min = filterPriceMin ? Number(filterPriceMin) : null
+      const max = filterPriceMax ? Number(filterPriceMax) : null
+      if (min != null && !isNaN(min) && (price == null || price < min)) return false
+      if (max != null && !isNaN(max) && (price == null || price > max)) return false
+      return true
+    })
+  }, [list, searchName, filterCategory, filterSubCategory, filterInStock, filterPriceMin, filterPriceMax])
+
   useEffect(() => {
     fetchList()
   }, [])
@@ -69,6 +95,89 @@ const List = ({ token }) => {
   return (
     <>
       <p className='mb-2'>All Products List</p>
+
+      <div className='flex flex-col sm:flex-row flex-wrap gap-3 mb-4 items-center'>
+        <input
+          type="text"
+          placeholder="Search by product name..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded w-full sm:max-w-[200px]"
+        />
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded w-full sm:w-auto"
+        >
+          <option value="">All categories</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+        <select
+          value={filterSubCategory}
+          onChange={(e) => setFilterSubCategory(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded w-full sm:w-auto"
+        >
+          <option value="">All subcategories</option>
+          {SUBCATEGORIES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select
+          value={filterInStock}
+          onChange={(e) => setFilterInStock(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded w-full sm:w-auto"
+        >
+          <option value="">All stock status</option>
+          <option value="yes">In stock</option>
+          <option value="no">Out of stock</option>
+        </select>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            placeholder="Min price"
+            value={filterPriceMin}
+            onChange={(e) => setFilterPriceMin(e.target.value)}
+            min="0"
+            step="0.01"
+            className="px-3 py-2 border border-gray-300 rounded w-24"
+          />
+          <span className="text-gray-500">—</span>
+          <input
+            type="number"
+            placeholder="Max price"
+            value={filterPriceMax}
+            onChange={(e) => setFilterPriceMax(e.target.value)}
+            min="0"
+            step="0.01"
+            className="px-3 py-2 border border-gray-300 rounded w-24"
+          />
+        </div>
+        {(searchName || filterCategory || filterSubCategory || filterInStock || filterPriceMin || filterPriceMax) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchName('')
+              setFilterCategory('')
+              setFilterSubCategory('')
+              setFilterInStock('')
+              setFilterPriceMin('')
+              setFilterPriceMax('')
+            }}
+            className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      {(searchName || filterCategory || filterSubCategory || filterInStock || filterPriceMin || filterPriceMax) && (
+        <p className='text-sm text-gray-600 mb-2'>
+          Showing {filteredList.length} of {list.length} products
+        </p>
+      )}
+
       <div className='flex flex-col gap-2 overflow-x-auto'>
 
         {/* ------- List Table Title ---------- */}
@@ -77,6 +186,7 @@ const List = ({ token }) => {
           <b>Name</b>
           <b>Description</b>
           <b>Category</b>
+          <b>Sub Category</b>
           <b>Colors</b>
           <b>Price</b>
           <b>Stock</b>
@@ -84,7 +194,7 @@ const List = ({ token }) => {
         </div>
 
         {/* ------ Product List ------ */}
-        {list.map((item) => (
+        {filteredList.map((item) => (
           <div
             className='grid grid-cols-[60px_1fr_140px_100px_120px_100px_80px_100px] items-center gap-2 py-3 px-2 border text-sm min-w-[700px]'
             key={item._id}
@@ -93,6 +203,7 @@ const List = ({ token }) => {
             <p className='font-medium'>{item.name}</p>
             <DescCell text={item.description} id={item._id} />
             <p>{item.category || '—'}</p>
+            <p>{item.subCategory || '—'}</p>
             <div className='flex flex-wrap gap-1.5 items-center'>
               {(item.colors || []).length > 0
                 ? item.colors.map((c, i) => (

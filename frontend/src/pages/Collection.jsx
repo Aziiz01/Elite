@@ -58,13 +58,14 @@ const Collection = () => {
 
     let fpCopy = filterProducts.slice();
 
+    const getDisplayPrice = (p) => (p.newPrice != null && p.newPrice !== '') ? p.newPrice : p.price;
     switch (sortType) {
       case 'low-high':
-        setFilterProducts(fpCopy.sort((a,b)=>(a.price - b.price)));
+        setFilterProducts(fpCopy.sort((a, b) => getDisplayPrice(a) - getDisplayPrice(b)));
         break;
 
       case 'high-low':
-        setFilterProducts(fpCopy.sort((a,b)=>(b.price - a.price)));
+        setFilterProducts(fpCopy.sort((a, b) => getDisplayPrice(b) - getDisplayPrice(a)));
         break;
 
       default:
@@ -139,7 +140,7 @@ const Collection = () => {
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
           {
             filterProducts.map((item,index)=>(
-              <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} />
+              <ProductItem key={index} name={item.name} id={item._id} price={item.price} newPrice={item.newPrice} image={item.image} />
             ))
           }
         </div>
