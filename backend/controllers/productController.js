@@ -1,16 +1,28 @@
 import { v2 as cloudinary } from "cloudinary"
 import productModel from "../models/productModel.js"
 import reviewModel from "../models/reviewModel.js"
+import subcategoryModel from "../models/subcategoryModel.js"
+import categoryModel from "../models/categoryModel.js"
 
 // function for add product
 const addProduct = async (req, res) => {
     try {
 
-        const { name, description, price, newPrice, category, subCategory, colors, bestseller, inStock } = req.body
+        const { name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock } = req.body
 
         // Validation
-        if (!name || !description || !category || !subCategory) {
-            return res.json({ success: false, message: "Name, description, category and subCategory are required" })
+        if (!name || !description || !categoryId) {
+            return res.json({ success: false, message: "Name, description and category are required" })
+        }
+        const category = await categoryModel.findById(categoryId)
+        if (!category) {
+            return res.json({ success: false, message: "Category not found" })
+        }
+        if (subCategoryId) {
+            const sub = await subcategoryModel.findOne({ _id: subCategoryId, categoryId })
+            if (!sub) {
+                return res.json({ success: false, message: "Subcategory does not belong to the selected category" })
+            }
         }
         const priceNum = Number(price)
         if (isNaN(priceNum) || priceNum < 0) {
@@ -51,8 +63,8 @@ const addProduct = async (req, res) => {
         const productData = {
             name: name.trim(),
             description: description.trim(),
-            category: category.trim(),
-            subCategory: subCategory.trim(),
+            categoryId,
+            subCategoryId: subCategoryId || undefined,
             price: priceNum,
             newPrice: hasValidNewPrice ? newPriceNum : undefined,
             colors: colorsArray.map(c => String(c).trim()),
@@ -76,11 +88,17 @@ const addProduct = async (req, res) => {
 // function for list product
 const listProducts = async (req, res) => {
     try {
-        
+
         const products = await productModel.find({})
+            .populate("categoryId", "name")
+            .populate("subCategoryId", "name")
+            .lean()
+
         const productsWithDisplayPrice = products.map(p => {
-            const obj = p.toObject()
+            const obj = { ...p }
             obj.displayPrice = p.newPrice ?? p.price
+            obj.category = p.categoryId?.name ?? null
+            obj.subCategory = p.subCategoryId?.name ?? null
             return obj
         })
         res.json({ success: true, products: productsWithDisplayPrice })
@@ -94,9 +112,9 @@ const listProducts = async (req, res) => {
 // function for removing product
 const removeProduct = async (req, res) => {
     try {
-        
+
         await productModel.findByIdAndDelete(req.body.id)
-        res.json({success:true,message:"Product Removed"})
+        res.json({ success: true, message: "Product Removed" })
 
     } catch (error) {
         console.log(error)
@@ -107,9 +125,11 @@ const removeProduct = async (req, res) => {
 // function for single product info
 const singleProduct = async (req, res) => {
     try {
-        
+
         const { productId } = req.body
         const product = await productModel.findById(productId)
+            .populate("categoryId", "name")
+            .populate("subCategoryId", "name")
         if (!product) {
             return res.json({ success: false, message: "Product not found" })
         }
@@ -122,6 +142,10 @@ const singleProduct = async (req, res) => {
 
         const productObj = product.toObject()
         productObj.displayPrice = product.newPrice ?? product.price
+        productObj.category = product.categoryId?.name ?? null
+        productObj.subCategory = product.subCategoryId?.name ?? null
+        productObj.categoryId = product.categoryId?._id
+        productObj.subCategoryId = product.subCategoryId?._id
         productObj.reviews = reviews
         res.json({ success: true, product: productObj })
 
@@ -134,7 +158,7 @@ const singleProduct = async (req, res) => {
 // function for update product
 const updateProduct = async (req, res) => {
     try {
-        const { id, name, description, price, newPrice, category, subCategory, colors, bestseller, inStock } = req.body
+        const { id, name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock } = req.body
 
         if (!id) {
             return res.json({ success: false, message: "Product ID is required" })
@@ -144,8 +168,18 @@ const updateProduct = async (req, res) => {
             return res.json({ success: false, message: "Product not found" })
         }
 
-        if (!name || !description || !category || !subCategory) {
-            return res.json({ success: false, message: "Name, description, category and subCategory are required" })
+        if (!name || !description || !categoryId) {
+            return res.json({ success: false, message: "Name, description and category are required" })
+        }
+        const category = await categoryModel.findById(categoryId)
+        if (!category) {
+            return res.json({ success: false, message: "Category not found" })
+        }
+        if (subCategoryId) {
+            const sub = await subcategoryModel.findOne({ _id: subCategoryId, categoryId })
+            if (!sub) {
+                return res.json({ success: false, message: "Subcategory does not belong to the selected category" })
+            }
         }
         const priceNum = Number(price)
         if (isNaN(priceNum) || priceNum < 0) {
@@ -194,8 +228,8 @@ const updateProduct = async (req, res) => {
 
         product.name = name.trim()
         product.description = description.trim()
-        product.category = category.trim()
-        product.subCategory = subCategory.trim()
+        product.categoryId = categoryId
+        product.subCategoryId = subCategoryId || undefined
         product.price = priceNum
         product.newPrice = hasValidNewPrice ? newPriceNum : undefined
         product.colors = colorsArray.map(c => String(c).trim())

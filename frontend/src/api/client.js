@@ -22,6 +22,9 @@ export const loginUser = (data) =>
 export const getUserProfile = (token) =>
   api.post('/api/user/profile', {}, withAuth(token));
 
+export const updateProfile = (data, token) =>
+  api.post('/api/user/profile/update', data, withAuth(token));
+
 // Product APIs
 export const getProducts = () =>
   api.get('/api/product/list');

@@ -3,7 +3,6 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
-import { CATEGORIES, SUBCATEGORIES } from '../constants/productOptions'
 
 const List = ({ token }) => {
 
@@ -69,6 +68,12 @@ const List = ({ token }) => {
     )
   }
 
+  const { filterCategories, filterSubcategories } = useMemo(() => {
+    const cats = [...new Set(list.map(p => p.category).filter(Boolean))].sort()
+    const subs = [...new Set(list.map(p => p.subCategory).filter(Boolean))].sort()
+    return { filterCategories: cats, filterSubcategories: subs }
+  }, [list])
+
   const filteredList = useMemo(() => {
     return list.filter((item) => {
       if (searchName.trim()) {
@@ -110,7 +115,7 @@ const List = ({ token }) => {
           className="px-3 py-2 border border-gray-300 rounded w-full sm:w-auto"
         >
           <option value="">All categories</option>
-          {CATEGORIES.map((c) => (
+          {filterCategories.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
@@ -120,7 +125,7 @@ const List = ({ token }) => {
           className="px-3 py-2 border border-gray-300 rounded w-full sm:w-auto"
         >
           <option value="">All subcategories</option>
-          {SUBCATEGORIES.map((s) => (
+          {filterSubcategories.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>

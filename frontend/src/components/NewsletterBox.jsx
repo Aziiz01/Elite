@@ -1,4 +1,5 @@
 import React from 'react'
+import { pexelsImages } from '../constants/images'
 
 const NewsletterBox = () => {
 
@@ -7,16 +8,32 @@ const NewsletterBox = () => {
     }
 
   return (
-    <div className=' text-center'>
-      <p className='text-2xl font-medium text-gray-800'>Subscribe now & get 20% off</p>
-      <p className='text-gray-400 mt-3'>
-      Stay updated with Elite—new arrivals, exclusive offers, and beauty tips.
-      </p>
-      <form onSubmit={onSubmitHandler} className='w-full sm:w-1/2 flex items-center gap-3 mx-auto my-6 border pl-3'>
-        <input className='w-full sm:flex-1 outline-none' type="email" placeholder='Enter your email' required/>
-        <button type='submit' className='bg-black text-white text-xs px-10 py-4'>SUBSCRIBE</button>
-      </form>
-    </div>
+    <section className='relative py-14 sm:py-20 min-h-[320px] flex items-center justify-center overflow-hidden'>
+      <img
+        src={pexelsImages.womanPinkEyeshadowWide}
+        alt=""
+        className='absolute inset-0 w-full h-full object-cover'
+        loading='lazy'
+      />
+      <div className='absolute inset-0 bg-black/50' />
+      <div className='relative text-center max-w-xl mx-auto px-4'>
+        <p className='text-xl sm:text-2xl font-medium text-white'>Subscribe & get 20% off</p>
+        <p className='text-gray-200 mt-2 text-sm'>
+          New arrivals, exclusive offers, and style tips—delivered to your inbox.
+        </p>
+        <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row gap-3 mt-6'>
+          <input
+            className='flex-1 border border-gray-300 rounded py-3 px-4 text-sm outline-none focus:border-white bg-white/95'
+            type="email"
+            placeholder='Enter your email'
+            required
+          />
+          <button type='submit' className='bg-white text-gray-900 text-sm font-medium px-6 py-3 hover:bg-gray-100 transition-colors rounded'>
+            SUBSCRIBE
+          </button>
+        </form>
+      </div>
+    </section>
   )
 }
 

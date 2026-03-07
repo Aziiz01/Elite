@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "migrate:products": "node scripts/migrate-product-schema.js"
+    "migrate:products": "node scripts/migrate-product-schema.js",
+    "migrate:categories": "node scripts/migrate-category-subcategory.js",
+    "seed:categories": "node scripts/seed-categories.js"
   },
   "author": "",
   "license": "ISC",

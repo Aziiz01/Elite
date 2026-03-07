@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
-import { CATEGORIES, SUBCATEGORIES } from '../constants/productOptions'
 
 const Add = ({ token }) => {
 
@@ -16,12 +15,50 @@ const Add = ({ token }) => {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [newPrice, setNewPrice] = useState("")
-  const [category, setCategory] = useState(CATEGORIES[0])
-  const [subCategory, setSubCategory] = useState(SUBCATEGORIES[0])
+  const [categories, setCategories] = useState([])
+  const [subcategories, setSubcategories] = useState([])
+  const [categoryId, setCategoryId] = useState("")
+  const [subCategoryId, setSubCategoryId] = useState("")
   const [bestseller, setBestseller] = useState(false)
   const [inStock, setInStock] = useState(true)
   const [colors, setColors] = useState([])
   const [colorPickerValue, setColorPickerValue] = useState("#000000")
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get(backendUrl + "/api/category/list")
+        if (res.data.success && res.data.categories?.length) {
+          setCategories(res.data.categories)
+          setCategoryId(res.data.categories[0]._id)
+        }
+      } catch (e) {
+        toast.error("Failed to load categories")
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    if (!categoryId) {
+      setSubcategories([])
+      setSubCategoryId("")
+      return
+    }
+    const fetchSubcategories = async () => {
+      try {
+        const res = await axios.get(backendUrl + "/api/category/subcategories", { params: { categoryId } })
+        if (res.data.success) {
+          setSubcategories(res.data.subcategories || [])
+          setSubCategoryId("")
+        }
+      } catch (e) {
+        setSubcategories([])
+        setSubCategoryId("")
+      }
+    }
+    fetchSubcategories()
+  }, [categoryId])
 
   const isValidHex = (hex) => /^#[0-9A-Fa-f]{6}$/.test(hex)
 
@@ -47,6 +84,10 @@ const Add = ({ token }) => {
       toast.error("At least one color is required")
       return
     }
+    if (!categoryId) {
+      toast.error("Please select a category")
+      return
+    }
 
     try {
       const formData = new FormData()
@@ -55,8 +96,8 @@ const Add = ({ token }) => {
       formData.append("description", description)
       formData.append("price", price)
       if (newPrice) formData.append("newPrice", newPrice)
-      formData.append("category", category)
-      formData.append("subCategory", subCategory)
+      formData.append("categoryId", categoryId)
+      if (subCategoryId) formData.append("subCategoryId", subCategoryId)
       formData.append("bestseller", bestseller)
       formData.append("inStock", inStock)
       formData.append("colors", JSON.stringify(colors))
@@ -127,18 +168,20 @@ const Add = ({ token }) => {
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
         <div>
           <p className='mb-2'>Product category</p>
-          <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2' value={category}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+          <select onChange={(e) => setCategoryId(e.target.value)} className='w-full px-3 py-2' value={categoryId} required>
+            {categories.length === 0 && <option value="">No categories — create one first</option>}
+            {categories.map((c) => (
+              <option key={c._id} value={c._id}>{c.name}</option>
             ))}
           </select>
         </div>
 
         <div>
-          <p className='mb-2'>Sub category</p>
-          <select onChange={(e) => setSubCategory(e.target.value)} className='w-full px-3 py-2' value={subCategory}>
-            {SUBCATEGORIES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+          <p className='mb-2'>Sub category (optional)</p>
+          <select onChange={(e) => setSubCategoryId(e.target.value)} className='w-full px-3 py-2' value={subCategoryId}>
+            <option value="">None</option>
+            {subcategories.map((s) => (
+              <option key={s._id} value={s._id}>{s.name}</option>
             ))}
           </select>
         </div>
