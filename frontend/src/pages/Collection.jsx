@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
@@ -6,12 +7,28 @@ import ProductItem from '../components/ProductItem';
 
 const Collection = () => {
 
+  const [searchParams] = useSearchParams()
   const { products , search , showSearch } = useContext(ShopContext);
   const [showFilter,setShowFilter] = useState(false);
   const [filterProducts,setFilterProducts] = useState([]);
   const [category,setCategory] = useState([]);
   const [subCategory,setSubCategory] = useState([]);
   const [sortType,setSortType] = useState('relavent')
+
+  const { filterCategories, filterSubcategories } = useMemo(() => {
+    const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort()
+    const subs = [...new Set(products.map(p => p.subCategory).filter(Boolean))].sort()
+    return { filterCategories: cats, filterSubcategories: subs }
+  }, [products])
+
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    const sub = searchParams.get('subCategory')
+    if (cat) setCategory([cat])
+    else setCategory([])
+    if (sub) setSubCategory([sub])
+    else setSubCategory([])
+  }, [searchParams])
 
   const toggleCategory = (e) => {
 
@@ -43,11 +60,11 @@ const Collection = () => {
     }
 
     if (category.length > 0) {
-      productsCopy = productsCopy.filter(item => category.includes(item.category));
+      productsCopy = productsCopy.filter(item => item.category && category.includes(item.category));
     }
 
     if (subCategory.length > 0 ) {
-      productsCopy = productsCopy.filter(item => subCategory.includes(item.subCategory))
+      productsCopy = productsCopy.filter(item => item.subCategory && subCategory.includes(item.subCategory))
     }
 
     setFilterProducts(productsCopy)
@@ -95,30 +112,24 @@ const Collection = () => {
         <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' :'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>CATEGORIES</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Men'} onChange={toggleCategory}/> Men
-            </p>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Women'} onChange={toggleCategory}/> Women
-            </p>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Kids'} onChange={toggleCategory}/> kids
-            </p>
+            {filterCategories.map((c) => (
+              <p key={c} className='flex gap-2'>
+                <input className='w-3' type="checkbox" value={c} onChange={toggleCategory} checked={category.includes(c)}/> {c}
+              </p>
+            ))}
+            {filterCategories.length === 0 && <p className='text-gray-500'>No categories</p>}
           </div>
         </div>
         {/* SubCategory Filter */}
         <div className={`border border-gray-300 pl-5 py-3 my-5 ${showFilter ? '' :'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>TYPE</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Topwear'} onChange={toggleSubCategory}/> Topwear
-            </p>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Bottomwear'} onChange={toggleSubCategory}/> Bottomwear
-            </p>
-            <p className='flex gap-2'>
-              <input className='w-3' type="checkbox" value={'Winterwear'} onChange={toggleSubCategory}/> Winterwear
-            </p>
+            {filterSubcategories.map((s) => (
+              <p key={s} className='flex gap-2'>
+                <input className='w-3' type="checkbox" value={s} onChange={toggleSubCategory} checked={subCategory.includes(s)}/> {s}
+              </p>
+            ))}
+            {filterSubcategories.length === 0 && <p className='text-gray-500'>No subcategories</p>}
           </div>
         </div>
       </div>

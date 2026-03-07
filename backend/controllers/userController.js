@@ -126,6 +126,45 @@ const listUsers = async (req, res) => {
     }
 }
 
+// Route for update own profile (authenticated user) - only address, telephone, password
+const updateProfile = async (req, res) => {
+    try {
+        const { userId, address, telephone, newPassword } = req.body
+
+        if (!userId) {
+            return res.json({ success: false, message: "Not authenticated" })
+        }
+
+        const user = await userModel.findById(userId)
+        if (!user) {
+            return res.json({ success: false, message: "User not found" })
+        }
+
+        if (address !== undefined) {
+            if (!address || !address.trim()) {
+                return res.json({ success: false, message: "Address is required" })
+            }
+            user.address = address.trim()
+        }
+        if (telephone !== undefined) {
+            if (!telephone || telephone.trim().length < 8) {
+                return res.json({ success: false, message: "Please enter a valid telephone number (min 8 characters)" })
+            }
+            user.telephone = telephone.trim()
+        }
+        if (newPassword && newPassword.length >= 8) {
+            const salt = await bcrypt.genSalt(10)
+            user.password = await bcrypt.hash(newPassword, salt)
+        }
+
+        await user.save()
+        res.json({ success: true, message: "Profile updated" })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
 // Route for update user (admin only)
 const updateUser = async (req, res) => {
     try {
@@ -217,4 +256,4 @@ const adminLogin = async (req, res) => {
 }
 
 
-export { loginUser, registerUser, getUserProfile, adminLogin, listUsers, updateUser, removeUser }
+export { loginUser, registerUser, getUserProfile, updateProfile, adminLogin, listUsers, updateUser, removeUser }

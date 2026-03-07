@@ -6,14 +6,13 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     newPrice: { type: Number },
     image: { type: Array, required: true },
-    category: { type: String, required: true },
-    subCategory: { type: String, required: true },
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "category", required: true },
+    subCategoryId: { type: mongoose.Schema.Types.ObjectId, ref: "subcategory" },
     colors: { type: [String], required: true },
     inStock: { type: Boolean, required: true, default: true },
     bestseller: { type: Boolean },
     date: { type: Number, required: true }
-})
+});
 
-const productModel  = mongoose.models.product || mongoose.model("product",productSchema);
-
-export default productModel
+const productModel = mongoose.models.product || mongoose.model("product", productSchema);
+export default productModel;
