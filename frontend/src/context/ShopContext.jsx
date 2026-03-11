@@ -6,6 +6,9 @@ import {
     updateCartApi,
     getCart,
     getProducts,
+    getFavoritesApi,
+    addFavoriteApi,
+    removeFavoriteApi,
     backendUrl,
 } from '../api/client'
 
@@ -13,13 +16,14 @@ export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
 
-    const currency = '$';
+    const currency = 'Dt ';
     const delivery_fee = 10;
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
+    const [favoriteIds, setFavoriteIds] = useState([])
     const navigate = useNavigate();
 
 
@@ -136,27 +140,67 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const loadFavorites = async (authToken) => {
+        try {
+            const res = await getFavoritesApi(authToken)
+            if (res.data.success && Array.isArray(res.data.favorites)) {
+                setFavoriteIds(res.data.favorites.map((f) => String(f.productId)))
+            }
+        } catch (e) {
+            // Silent fail
+        }
+    }
+
+    const toggleFavorite = async (productId) => {
+        const authToken = token || localStorage.getItem('token')
+        if (!authToken) {
+            toast.info('Login to add favorites')
+            return
+        }
+        const id = String(productId)
+        const isFav = favoriteIds.includes(id)
+        setFavoriteIds((prev) =>
+            isFav ? prev.filter((f) => f !== id) : [...prev, id]
+        )
+        try {
+            if (isFav) {
+                await removeFavoriteApi(productId, authToken)
+                toast.success('Removed from favorites')
+            } else {
+                await addFavoriteApi(productId, authToken)
+                toast.success('Added to favorites')
+            }
+        } catch (err) {
+            setFavoriteIds((prev) => (isFav ? [...prev, id] : prev.filter((f) => f !== id)))
+            toast.error(err?.response?.data?.message || 'Failed to update favorites')
+        }
+    }
+
     useEffect(() => {
         getProductsData()
     }, [])
 
     useEffect(() => {
+        const authToken = token || localStorage.getItem('token')
         if (!token && localStorage.getItem('token')) {
             setToken(localStorage.getItem('token'))
-            getUserCart(localStorage.getItem('token'))
         }
-        if (token) {
-            getUserCart(token)
+        if (authToken) {
+            getUserCart(authToken)
+            loadFavorites(authToken)
+        } else {
+            setFavoriteIds([])
         }
     }, [token])
 
     const value = {
         products, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
-        cartItems, addToCart,setCartItems,
+        cartItems, addToCart, setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        setToken, token
+        setToken, token,
+        favoriteIds, toggleFavorite, loadFavorites
     }
 
     return (

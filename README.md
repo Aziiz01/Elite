@@ -17,7 +17,7 @@ A modern, full-stack ecommerce application built with React, Node.js, and MongoD
 - **Product Details** — View product info, images, colors, and customer reviews
 - **Shopping Cart** — Add/remove items, update quantities with cart modal
 - **User Authentication** — Register, login, and guest checkout
-- **Checkout** — Place orders with Stripe or Razorpay payment integration
+- **Checkout** — Place orders with Cash on Delivery (COD)
 - **Order Tracking** — View order history and status
 - **Reviews & Ratings** — Leave and view product reviews
 - **Responsive Design** — Mobile-friendly UI with Tailwind CSS
@@ -45,7 +45,7 @@ A modern, full-stack ecommerce application built with React, Node.js, and MongoD
 | Backend    | Node.js, Express, Mongoose            |
 | Database   | MongoDB                                |
 | Storage    | Cloudinary (images)                   |
-| Payments   | Stripe, Razorpay                      |
+| Payments   | Cash on Delivery (COD)                |
 | Auth       | JWT, bcrypt                           |
 
 ## Getting Started
@@ -55,7 +55,6 @@ A modern, full-stack ecommerce application built with React, Node.js, and MongoD
 - Node.js (v18+)
 - MongoDB database
 - Cloudinary account (for image uploads)
-- Stripe & Razorpay keys (for payments)
 - Vonage & SMTP credentials (optional, for SMS/email)
 
 ### Backend Setup
@@ -74,9 +73,6 @@ JWT_SECRET=your_jwt_secret
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-STRIPE_SECRET_KEY=your_stripe_secret
-RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
 # Optional: Email & SMS
 MAIL_HOST=your_smtp_host
 MAIL_USER=your_email

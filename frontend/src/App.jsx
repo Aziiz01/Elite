@@ -10,19 +10,21 @@ import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Profile from './pages/Profile'
 import Navbar from './components/Navbar'
+import PromoStrip from './components/PromoStrip'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Verify from './pages/Verify'
 
 const App = () => {
   return (
-    <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-      <ToastContainer />
-      <Navbar />
-      <SearchBar />
-      <Routes>
+    <div>
+      <PromoStrip />
+      <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+        <ToastContainer />
+        <Navbar />
+        <SearchBar />
+        <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/collection' element={<Collection />} />
         <Route path='/about' element={<About />} />
@@ -33,9 +35,9 @@ const App = () => {
         <Route path='/place-order' element={<PlaceOrder />} />
         <Route path='/orders' element={<Navigate to='/profile?section=orders' replace />} />
         <Route path='/profile' element={<Profile />} />
-        <Route path='/verify' element={<Verify />} />
-      </Routes>
-      <Footer />
+        </Routes>
+        <Footer />
+      </div>
     </div>
   )
 }

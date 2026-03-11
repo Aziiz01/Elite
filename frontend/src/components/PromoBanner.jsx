@@ -12,7 +12,7 @@ const PROMOS = [
   },
   {
     title: 'Free delivery',
-    subtitle: 'On orders over $50',
+    subtitle: 'On orders over 50 Dt',
     cta: 'Shop now',
     to: '/collection',
     image: pexelsImages.womanPinkEyeshadowWide,

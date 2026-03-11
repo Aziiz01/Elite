@@ -142,9 +142,10 @@ function escapeHtml(str) {
 }
 
 function formatPrice(amount) {
-    return new Intl.NumberFormat("en-IN", {
+    return new Intl.NumberFormat("en", {
         style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 0
+        currency: "TND",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
     }).format(amount);
 }
