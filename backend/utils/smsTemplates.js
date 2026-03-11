@@ -11,7 +11,7 @@ function formatItemsList(items) {
 export const getOrderPlacedSms = ({ customerName, orderId, amount, items }) => {
     const itemsStr = formatItemsList(items);
     const detail = itemsStr ? ` Items: ${itemsStr}.` : "";
-    return `Hi ${customerName}, your Elite order #${orderId} has been placed.${detail} Total: ₹${amount}. Thank you!`;
+    return `Hi ${customerName}, your Elite order #${orderId} has been placed.${detail} Total: ${amount} Dt. Thank you!`;
 };
 
 export const getOutForDeliverySms = ({ customerName, orderId, items }) => {

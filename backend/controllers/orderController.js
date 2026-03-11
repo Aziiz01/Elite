@@ -8,8 +8,7 @@ const placeOrder = async (req,res) => {
     
     try {
         
-        const { userId, items, amount, address, paymentMethod } = req.body;
-        const pm = paymentMethod || "COD";
+        const { userId, items, amount, address } = req.body;
 
         const orderData = {
             userId,
@@ -17,7 +16,7 @@ const placeOrder = async (req,res) => {
             address,
             amount,
             status: "Order Placed",
-            paymentMethod: pm,
+            paymentMethod: "COD",
             payment: false,
             date: Date.now()
         }
@@ -43,7 +42,7 @@ const placeOrder = async (req,res) => {
                 items: newOrder.items,
                 totalAmount: newOrder.amount,
                 address: address || {},
-                paymentMethod: pm,
+                paymentMethod: "COD",
                 status: "Order Placed"
             }).catch((err) => console.error("Order confirmation email failed:", err));
         }
@@ -72,7 +71,7 @@ const placeGuestOrder = async (req,res) => {
     
     try {
         
-        const { userId, items, amount, address, paymentMethod } = req.body;
+        const { userId, items, amount, address } = req.body;
 
         if (!userId || !items || !amount || !address) {
             return res.json({ success: false, message: "userId, items, amount and address are required" })
@@ -88,7 +87,7 @@ const placeGuestOrder = async (req,res) => {
             address,
             amount,
             status: "Order Placed",
-            paymentMethod: paymentMethod || "COD",
+            paymentMethod: "COD",
             payment: false,
             date: Date.now()
         }
@@ -110,7 +109,7 @@ const placeGuestOrder = async (req,res) => {
                 items: newOrder.items,
                 totalAmount: newOrder.amount,
                 address: address || {},
-                paymentMethod: paymentMethod || "COD",
+                paymentMethod: "COD",
                 status: "Order Placed"
             }).catch((err) => console.error("Order confirmation email failed:", err));
         }

@@ -5,6 +5,7 @@ import {
     getOutForDeliveryEmailTemplate,
     getOrderDeliveredEmailTemplate
 } from "../utils/emailTemplates/orderStatusUpdate.js";
+import { getPriceDropEmailTemplate } from "../utils/emailTemplates/priceDropNotification.js";
 
 /**
  * Sends order confirmation email to the customer (full order details)
@@ -102,6 +103,42 @@ export const sendOrderStatusEmail = async ({ to, customerName, orderId, orderDat
         return { success: true };
     } catch (error) {
         console.error("Mail: Failed to send status email:", error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Sends price drop notification to users who favorited the product
+ */
+export const sendPriceDropEmail = async ({ to, customerName, productName, productImage, oldPrice, newPrice, productUrl }) => {
+    if (!to || !String(to).trim()) {
+        return { success: false, error: "Recipient email is required" };
+    }
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn("Mail: SMTP not configured. Skipping price drop email.");
+        return { success: false, error: "SMTP not configured" };
+    }
+
+    try {
+        const html = getPriceDropEmailTemplate({
+            customerName: customerName || "Customer",
+            productName: productName || "Product",
+            productImage: productImage || null,
+            oldPrice,
+            newPrice,
+            productUrl,
+        });
+
+        await transporter.sendMail({
+            from: process.env.MAIL_FROM || `"Elite" <${process.env.SMTP_USER}>`,
+            to: to.trim(),
+            subject: `Price drop! ${productName || "A product you favorited"} is now on sale`,
+            html,
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Mail: Failed to send price drop email:", error.message);
         return { success: false, error: error.message };
     }
 };

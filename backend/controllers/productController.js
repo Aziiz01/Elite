@@ -3,6 +3,8 @@ import productModel from "../models/productModel.js"
 import reviewModel from "../models/reviewModel.js"
 import subcategoryModel from "../models/subcategoryModel.js"
 import categoryModel from "../models/categoryModel.js"
+import favoriteModel from "../models/favoriteModel.js"
+import { sendPriceDropEmail } from "../services/mailService.js"
 
 // function for add product
 const addProduct = async (req, res) => {
@@ -226,6 +228,10 @@ const updateProduct = async (req, res) => {
             return res.json({ success: false, message: "At least one image is required" })
         }
 
+        const prevPrice = product.price
+        const prevNewPrice = product.newPrice
+        const displayOldPrice = prevNewPrice != null && prevNewPrice !== '' ? prevNewPrice : prevPrice
+
         product.name = name.trim()
         product.description = description.trim()
         product.categoryId = categoryId
@@ -236,7 +242,38 @@ const updateProduct = async (req, res) => {
         product.inStock = inStock === "false" ? false : true
         product.bestseller = bestseller === "true"
         product.image = imagesUrl.filter(Boolean)
+
         await product.save()
+
+        // Price drop: newPrice decreased – notify users who favorited this product
+        if (hasValidNewPrice && newPriceNum < displayOldPrice) {
+            favoriteModel
+                .find({ productId: id })
+                .populate("userId", "email firstName")
+                .lean()
+                .then((favorites) => {
+                    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+                    const productUrl = `${baseUrl}/product/${id}`
+                    const productImage = product.image?.[0]
+                    const productName = product.name
+
+                    favorites.forEach((f) => {
+                        const user = f.userId
+                        if (user?.email) {
+                            sendPriceDropEmail({
+                                to: user.email,
+                                customerName: user.firstName || "Customer",
+                                productName,
+                                productImage,
+                                oldPrice: displayOldPrice,
+                                newPrice: newPriceNum,
+                                productUrl,
+                            }).catch((e) => console.error("Price drop email failed:", e))
+                        }
+                    })
+                })
+                .catch((e) => console.error("Price drop notification lookup failed:", e))
+        }
 
         res.json({ success: true, message: "Product updated" })
 

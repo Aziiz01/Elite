@@ -2,9 +2,8 @@ import React, { useContext, useEffect, useState, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
-import { assets } from '../assets/assets'
 import { ShopContext } from '../context/ShopContext'
-import { placeOrder as placeOrderApi, placeGuestOrder, createStripeOrder, createRazorpayOrder, verifyRazorpayPayment, getUserProfile } from '../api/client'
+import { placeOrder as placeOrderApi, placeGuestOrder, getUserProfile } from '../api/client'
 import { toast } from 'react-toastify'
 
 const generateGuestId = () => 'guest-' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`)
@@ -18,7 +17,6 @@ const PlaceOrder = () => {
     const isGuest = location.state?.isGuest === true
     const guestUserId = useMemo(() => generateGuestId(), [isGuest])
 
-    const [method, setMethod] = useState('cod');
     const [profileLoaded, setProfileLoaded] = useState(false);
     const { token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
 
@@ -39,10 +37,6 @@ const PlaceOrder = () => {
             navigate('/cart')
         }
     }, [isGuest, token, navigate])
-
-    useEffect(() => {
-        if (isGuest) setMethod('cod')
-    }, [isGuest])
 
     useEffect(() => {
         if (!isGuest && (token || localStorage.getItem('token')) && !profileLoaded) {
@@ -75,35 +69,6 @@ const PlaceOrder = () => {
         const name = event.target.name
         const value = event.target.value
         setFormData(data => ({ ...data, [name]: value }))
-    }
-
-    const initPay = (order) => {
-        const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-            amount: order.amount,
-            currency: order.currency,
-            name:'Order Payment',
-            description:'Order Payment',
-            order_id: order.id,
-            receipt: order.receipt,
-            handler: async (response) => {
-                try {
-                    const authToken = token || localStorage.getItem('token')
-                    const { data } = await verifyRazorpayPayment(response, authToken)
-                    if (data.success) {
-                        navigate('/orders')
-                        setCartItems({})
-                    } else {
-                        toast.error(data.message || 'Payment verification failed')
-                    }
-                } catch (error) {
-                    console.log(error)
-                    toast.error(error?.response?.data?.message || error.message)
-                }
-            }
-        }
-        const rzp = new window.Razorpay(options)
-        rzp.open()
     }
 
     const validateForm = () => {
@@ -149,14 +114,10 @@ const PlaceOrder = () => {
                 address: formData,
                 items: orderItems,
                 amount,
-                paymentMethod: method === 'cod' ? 'COD' : method === 'stripe' ? 'Stripe' : 'Razorpay'
+                paymentMethod: 'COD'
             }
 
             if (isGuest) {
-                if (method !== 'cod') {
-                    toast.error('Guest checkout supports Cash on Delivery only. Please login for online payment.')
-                    return
-                }
                 const guestOrderData = {
                     ...orderPayload,
                     userId: guestUserId
@@ -179,38 +140,12 @@ const PlaceOrder = () => {
                 return
             }
 
-            switch (method) {
-                case 'cod':
-                    const response = await placeOrderApi(orderPayload, authToken)
-                    if (response.data.success) {
-                        setCartItems({})
-                        navigate('/orders')
-                    } else {
-                        toast.error(response.data.message)
-                    }
-                    break;
-
-                case 'stripe':
-                    const responseStripe = await createStripeOrder(orderPayload, authToken)
-                    if (responseStripe.data.success) {
-                        const { session_url } = responseStripe.data
-                        window.location.replace(session_url)
-                    } else {
-                        toast.error(responseStripe.data.message)
-                    }
-                    break;
-
-                case 'razorpay':
-                    const responseRazorpay = await createRazorpayOrder(orderPayload, authToken)
-                    if (responseRazorpay.data.success) {
-                        initPay(responseRazorpay.data.order)
-                    } else {
-                        toast.error(responseRazorpay.data.message)
-                    }
-                    break;
-
-                default:
-                    break;
+            const response = await placeOrderApi(orderPayload, authToken)
+            if (response.data.success) {
+                setCartItems({})
+                navigate('/profile?section=orders')
+            } else {
+                toast.error(response.data.message)
             }
 
 
@@ -259,30 +194,8 @@ const PlaceOrder = () => {
                 </div>
 
                 <div className='mt-12'>
-                    <Title text1={'PAYMENT'} text2={'METHOD'} />
-                    {isGuest && (
-                        <p className='text-sm text-gray-500 mb-3'>Guest checkout supports Cash on Delivery only.</p>
-                    )}
-                    <div className='flex gap-3 flex-col lg:flex-row'>
-                        {!isGuest && (
-                          <>
-                            <div onClick={() => setMethod('stripe')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                                <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
-                                <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
-                            </div>
-                            <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                                <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
-                                <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-                            </div>
-                          </>
-                        )}
-                        <div onClick={() => setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
-                            <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
-                        </div>
-                    </div>
-
-                    <div className='w-full text-end mt-8'>
+                    <p className='text-sm text-gray-600 mb-4'>Cash on Delivery — Pay when your order arrives.</p>
+                    <div className='w-full text-end'>
                         <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
                     </div>
                 </div>

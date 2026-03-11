@@ -14,7 +14,7 @@ function escapeHtml(str) {
 }
 
 function formatPrice(amount) {
-    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount || 0);
+    return new Intl.NumberFormat("en", { style: "currency", currency: "TND", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount || 0);
 }
 
 function buildItemsRows(items) {

@@ -18,7 +18,7 @@ const Home = () => {
       <LatestCollection />
       <CategoryStrip /> 
       <BestSeller />
-      <CuratedCollection title1="DISCOVER" title2="WOMEN'S TOPWEAR" category="Women" subCategory="Topwear" limit={4} />
+      <CuratedCollection title1="DISCOVER" title2="WOMEN'S TOPWEAR" category="Yeux" subCategory="Eye Liner" limit={4} />
       <PromoBanner />
       <FeaturedImageSection />
       <VideoSection />

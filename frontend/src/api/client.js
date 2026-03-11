@@ -29,6 +29,10 @@ export const updateProfile = (data, token) =>
 export const getProducts = () =>
   api.get('/api/product/list');
 
+// Category APIs (public)
+export const getCategories = () =>
+  api.get('/api/category/list');
+
 // Cart APIs (require token)
 export const addToCartApi = (data, token) =>
   api.post('/api/cart/add', data, withAuth(token));
@@ -46,18 +50,6 @@ export const placeOrder = (orderData, token) =>
 export const placeGuestOrder = (orderData) =>
   api.post('/api/order/place-guest', orderData);
 
-export const createStripeOrder = (orderData, token) =>
-  api.post('/api/order/stripe', orderData, withAuth(token));
-
-export const createRazorpayOrder = (orderData, token) =>
-  api.post('/api/order/razorpay', orderData, withAuth(token));
-
-export const verifyStripePayment = (data, token) =>
-  api.post('/api/order/verifyStripe', data, withAuth(token));
-
-export const verifyRazorpayPayment = (data, token) =>
-  api.post('/api/order/verifyRazorpay', data, withAuth(token));
-
 export const getUserOrders = (token) =>
   api.post('/api/order/userorders', {}, withAuth(token));
 
@@ -73,5 +65,18 @@ export const updateReviewApi = (data, token) =>
 
 export const deleteReviewApi = (data, token) =>
   api.post('/api/review/delete', data, withAuth(token));
+
+// Favorites APIs (require token)
+export const addFavoriteApi = (productId, token) =>
+  api.post('/api/favorite/add', { productId }, withAuth(token));
+
+export const removeFavoriteApi = (productId, token) =>
+  api.post('/api/favorite/remove', { productId }, withAuth(token));
+
+export const getFavoritesApi = (token) =>
+  api.post('/api/favorite/list', {}, withAuth(token));
+
+export const checkFavoriteApi = (productId, token) =>
+  api.post('/api/favorite/check', { productId }, withAuth(token));
 
 export { BASE_URL as backendUrl };

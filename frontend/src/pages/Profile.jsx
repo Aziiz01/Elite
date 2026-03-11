@@ -1,19 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
-import { getUserProfile, updateProfile, getUserOrders } from '../api/client'
+import { getUserProfile, updateProfile, getUserOrders, getFavoritesApi, removeFavoriteApi } from '../api/client'
 import { toast } from 'react-toastify'
 
-const SECTIONS = { editProfile: 'editProfile', orders: 'orders' }
+const SECTIONS = { editProfile: 'editProfile', orders: 'orders', favorites: 'favorites' }
 
 const Profile = () => {
-  const { token, currency, navigate, setToken, setCartItems } = useContext(ShopContext)
+  const { token, currency, navigate, setToken, setCartItems, loadFavorites } = useContext(ShopContext)
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [section, setSection] = useState(SECTIONS.editProfile)
   const [user, setUser] = useState(null)
   const [orders, setOrders] = useState([])
+  const [favorites, setFavorites] = useState([])
   const [editForm, setEditForm] = useState({ address: '', telephone: '', newPassword: '' })
 
   const authToken = token || localStorage.getItem('token')
@@ -31,8 +32,9 @@ const Profile = () => {
     Promise.all([
       getUserProfile(authToken),
       getUserOrders(authToken),
+      getFavoritesApi(authToken),
     ])
-      .then(([profileRes, ordersRes]) => {
+      .then(([profileRes, ordersRes, favRes]) => {
         if (profileRes.data.success && profileRes.data.user) {
           const u = profileRes.data.user
           setUser(u)
@@ -40,6 +42,9 @@ const Profile = () => {
         }
         if (ordersRes.data.success) {
           setOrders((ordersRes.data.orders || []).reverse())
+        }
+        if (favRes?.data?.success && Array.isArray(favRes.data.favorites)) {
+          setFavorites(favRes.data.favorites)
         }
       })
       .catch(() => toast.error('Failed to load profile'))
@@ -84,6 +89,21 @@ const Profile = () => {
     }
   }
 
+  const handleRemoveFavorite = async (productId) => {
+    try {
+      const res = await removeFavoriteApi(productId, authToken)
+      if (res.data.success) {
+        setFavorites((prev) => prev.filter((f) => String(f.productId) !== String(productId)))
+        loadFavorites?.(authToken)
+        toast.success('Removed from favorites')
+      } else {
+        toast.error(res.data.message || 'Failed to remove')
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to remove')
+    }
+  }
+
   if (loading) {
     return (
       <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
@@ -113,6 +133,12 @@ const Profile = () => {
                 className={`text-left py-2 px-1 text-sm ${section === SECTIONS.orders ? 'text-pink-600 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Orders
+              </button>
+              <button
+                onClick={() => goTo(SECTIONS.favorites)}
+                className={`text-left py-2 px-1 text-sm ${section === SECTIONS.favorites ? 'text-pink-600 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Favorites
               </button>
               <button
                 onClick={logout}
@@ -161,6 +187,49 @@ const Profile = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {section === SECTIONS.favorites && (
+            <div>
+              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Favorites</h1>
+              {favorites.length === 0 ? (
+                <p className='text-gray-500 py-8'>No favorites yet. Add products from the collection!</p>
+              ) : (
+                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+                  {favorites.map((item) => (
+                    <div key={item._id} className='group relative border border-gray-200 rounded overflow-hidden'>
+                      <Link to={`/product/${item.productId}`} className='block' onClick={() => scrollTo(0, 0)}>
+                        <div className='aspect-square bg-gray-50'>
+                          <img
+                            src={item.image?.[0]}
+                            alt={item.name}
+                            className='w-full h-full object-contain'
+                          />
+                        </div>
+                        <div className='p-3'>
+                          <p className='text-sm line-clamp-2 text-gray-800'>{item.name}</p>
+                          <p className='text-sm font-medium mt-1'>
+                            {item.newPrice != null && item.newPrice !== '' ? (
+                              <span><span className='line-through text-gray-500'>{currency}{item.price}</span> <span className='text-green-600'>{currency}{item.newPrice}</span></span>
+                            ) : (
+                              <span>{currency}{item.price}</span>
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                      <button
+                        type='button'
+                        onClick={() => handleRemoveFavorite(item.productId)}
+                        className='absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-gray-600 hover:text-pink-500 hover:bg-white shadow-sm'
+                        aria-label='Remove from favorites'
+                      >
+                        <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'><path d='M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z' /></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
