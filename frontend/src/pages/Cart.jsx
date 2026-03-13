@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
 import { assets } from '../assets/assets';
@@ -39,7 +40,18 @@ const Cart = () => {
       </div>
 
       <div>
-        {
+        {cartData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <p className="text-gray-600 text-lg mb-2">Your cart is empty</p>
+            <p className="text-gray-500 text-sm mb-6">Add some items to get started.</p>
+            <Link
+              to="/collection"
+              className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+            >
+              Browse collection
+            </Link>
+          </div>
+        ) : (
           cartData.map((item, index) => {
 
             const productData = products.find((product) => product._id === item._id);
@@ -74,9 +86,8 @@ const Cart = () => {
                 <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="Remove" />
               </div>
             )
-
           })
-        }
+        )}
       </div>
 
       <div className='flex justify-end my-20'>

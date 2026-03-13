@@ -64,21 +64,35 @@ cd backend
 npm install
 ```
 
-Create a `.env` file in `backend/`:
+Create a `.env` file in `backend/` (see `backend/.env.example`):
 
 ```env
-PORT=4000
+# Required
 MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-CLOUDINARY_CLOUD_NAME=your_cloud_name
+JWT_SECRET=your_jwt_secret_at_least_32_chars
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_admin_password
+
+# Optional
+PORT=4000
+CLOUDINARY_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-# Optional: Email & SMS
-MAIL_HOST=your_smtp_host
-MAIL_USER=your_email
-MAIL_PASS=your_password
-VONAGE_API_KEY=your_vonage_key
-VONAGE_API_SECRET=your_vonage_secret
+CLOUDINARY_SECRET_KEY=your_api_secret
+# Or use: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_SECRET (aliases supported)
+
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email
+SMTP_PASS=your_app_password
+# Or use: MAIL_HOST, MAIL_USER, MAIL_PASS (aliases supported)
+
+# SMS (Vonage)
+VONAGE_API_KEY=
+VONAGE_API_SECRET=
+
+# CORS (comma-separated origins; defaults to localhost:5173,5174 if unset)
+# CORS_ORIGINS=https://your-store.com
 ```
 
 Start the server:

@@ -50,7 +50,7 @@ const listSubcategoriesByCategory = async (req, res) => {
 
 const createCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, description } = req.body;
         if (!name || !String(name).trim()) {
             return res.json({ success: false, message: "Name is required" });
         }
@@ -64,7 +64,11 @@ const createCategory = async (req, res) => {
             const result = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
             imageUrl = result.secure_url;
         }
-        const category = new categoryModel({ name: name.trim(), image: imageUrl });
+        const category = new categoryModel({
+            name: name.trim(),
+            image: imageUrl,
+            description: description ? String(description).trim() : undefined
+        });
         await category.save();
         res.json({ success: true, message: "Category created", category });
     } catch (error) {
@@ -75,7 +79,7 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     try {
-        const { id, name } = req.body;
+        const { id, name, description } = req.body;
         if (!id) {
             return res.json({ success: false, message: "Category ID is required" });
         }
@@ -89,6 +93,9 @@ const updateCategory = async (req, res) => {
                 return res.json({ success: false, message: "A category with this name already exists" });
             }
             category.name = name.trim();
+        }
+        if (description !== undefined) {
+            category.description = description ? String(description).trim() : null;
         }
         const imageFile = req.file;
         if (imageFile) {
