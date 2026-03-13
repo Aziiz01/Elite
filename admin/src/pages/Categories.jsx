@@ -7,12 +7,14 @@ import { assets } from '../assets/assets'
 const Categories = ({ token }) => {
   const [categories, setCategories] = useState([])
   const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryDescription, setNewCategoryDescription] = useState('')
   const [newCategoryImage, setNewCategoryImage] = useState(null)
   const [newSubName, setNewSubName] = useState('')
   const [selectedCatForSub, setSelectedCatForSub] = useState('')
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
   const [editImage, setEditImage] = useState(null)
   const [editingSubId, setEditingSubId] = useState(null)
   const [editSubName, setEditSubName] = useState('')
@@ -47,12 +49,14 @@ const Categories = ({ token }) => {
     try {
       const formData = new FormData()
       formData.append('name', newCategoryName.trim())
+      if (newCategoryDescription.trim()) formData.append('description', newCategoryDescription.trim())
       if (newCategoryImage instanceof File) formData.append('image', newCategoryImage)
 
       const res = await axios.post(backendUrl + '/api/category/create', formData, { headers: { token } })
       if (res.data.success) {
         toast.success('Category added')
         setNewCategoryName('')
+        setNewCategoryDescription('')
         setNewCategoryImage(null)
         fetchCategories()
       } else {
@@ -66,12 +70,14 @@ const Categories = ({ token }) => {
   const startEdit = (cat) => {
     setEditingId(cat._id)
     setEditName(cat.name || '')
+    setEditDescription(cat.description || '')
     setEditImage(null)
   }
 
   const cancelEdit = () => {
     setEditingId(null)
     setEditName('')
+    setEditDescription('')
     setEditImage(null)
   }
 
@@ -82,6 +88,7 @@ const Categories = ({ token }) => {
       const formData = new FormData()
       formData.append('id', editingId)
       formData.append('name', editName.trim())
+      formData.append('description', editDescription.trim())
       if (editImage instanceof File) formData.append('image', editImage)
 
       const res = await axios.post(backendUrl + '/api/category/update', formData, { headers: { token } })
@@ -213,6 +220,16 @@ const Categories = ({ token }) => {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+              <textarea
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+                placeholder="Short description shown on the storefront"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
               <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
                 <img
@@ -301,6 +318,7 @@ const Categories = ({ token }) => {
                   <p className="font-semibold text-gray-800">{c.name}</p>
                   <p className="text-sm text-gray-500">
                     {(c.subcategories || []).length} subcategor{(c.subcategories || []).length !== 1 ? 'ies' : 'y'}
+                    {c.description && ' · Has description'}
                   </p>
                 </div>
                 <span className="text-gray-400">{expandedCategory === c._id ? '▲' : '▼'}</span>
@@ -317,6 +335,16 @@ const Categories = ({ token }) => {
                           onChange={(e) => setEditName(e.target.value)}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                           placeholder="Category name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          rows={2}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"
+                          placeholder="Short description shown on the storefront"
                         />
                       </div>
                       <div>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -8,6 +9,25 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Global error handling (network, 5xx, 429 - callers handle 4xx with their own messages)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      toast.error('Connection error. Please check your network.');
+      return Promise.reject(error);
+    }
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
+    if (status >= 500) {
+      toast.error(message || 'Server error. Please try again later.');
+    } else if (status === 429) {
+      toast.error('Too many requests. Please wait a moment.');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Add auth token to requests
 const withAuth = (token) => (token ? { headers: { token } } : {});

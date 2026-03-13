@@ -1,7 +1,7 @@
 import React from 'react'
 import Hero from '../components/Hero'
 import PromoBanner from '../components/PromoBanner'
-import CategoryStrip from '../components/CategoryStrip'
+import FeaturedCategories from '../components/FeaturedCategories'
 import LatestCollection from '../components/LatestCollection'
 import CuratedCollection from '../components/CuratedCollection'
 import BestSeller from '../components/BestSeller'
@@ -16,7 +16,7 @@ const Home = () => {
     <div>
       <Hero />
       <LatestCollection />
-      <CategoryStrip /> 
+      <FeaturedCategories categoryNames={['Women', 'Men', 'Kids']} /> 
       <BestSeller />
       <CuratedCollection title1="DISCOVER" title2="WOMEN'S TOPWEAR" category="Yeux" subCategory="Eye Liner" limit={4} />
       <PromoBanner />

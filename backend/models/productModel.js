@@ -14,5 +14,10 @@ const productSchema = new mongoose.Schema({
     date: { type: Number, required: true }
 });
 
+productSchema.index({ categoryId: 1 });
+productSchema.index({ bestseller: 1 });
+productSchema.index({ date: -1 });
+productSchema.index({ categoryId: 1, subCategoryId: 1 });
+
 const productModel = mongoose.models.product || mongoose.model("product", productSchema);
 export default productModel;

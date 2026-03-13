@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
@@ -149,11 +149,35 @@ const Collection = () => {
 
         {/* Map Products */}
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
-          {
-            filterProducts.map((item,index)=>(
+          {filterProducts.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 px-6 text-center">
+              <p className="text-gray-600 text-lg mb-2">No products found</p>
+              <p className="text-gray-500 text-sm mb-6">
+                {category.length > 0 || subCategory.length > 0 || (showSearch && search)
+                  ? 'Try adjusting your filters or search.'
+                  : 'There are no products in this collection yet.'}
+              </p>
+              {(category.length > 0 || subCategory.length > 0 || (showSearch && search)) ? (
+                <Link
+                  to="/collection"
+                  className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Clear filters
+                </Link>
+              ) : (
+                <Link
+                  to="/"
+                  className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Back to home
+                </Link>
+              )}
+            </div>
+          ) : (
+            filterProducts.map((item, index) => (
               <ProductItem key={index} name={item.name} id={item._id} price={item.price} newPrice={item.newPrice} image={item.image} />
             ))
-          }
+          )}
         </div>
       </div>
 
