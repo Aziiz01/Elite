@@ -1,22 +1,80 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import productModel from "../models/productModel.js";
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from "../services/mailService.js";
 import { sendOrderPlacedSms, sendOrderStatusSms } from "../services/smsService.js";
+
+// Validate items and compute server-side amount. Returns { valid, amount, validatedItems, error }
+const validateOrderItems = async (items, deliveryFee = 0) => {
+    if (!Array.isArray(items) || items.length === 0) {
+        return { valid: false, error: "No order items" };
+    }
+    const validatedItems = [];
+    let totalAmount = 0;
+
+    for (const it of items) {
+        const productId = it._id;
+        const color = it.color;
+        const qty = Math.max(1, Number(it.quantity) || 1);
+
+        if (!productId || !color) {
+            return { valid: false, error: "Each item must have product id and color" };
+        }
+
+        const product = await productModel.findById(productId).lean();
+        if (!product) {
+            return { valid: false, error: `Product not found: ${productId}` };
+        }
+        if (!product.inStock) {
+            return { valid: false, error: `Product "${product.name}" is out of stock` };
+        }
+        const validColors = Array.isArray(product.colors) ? product.colors : [];
+        if (!validColors.includes(color)) {
+            return { valid: false, error: `Invalid color "${color}" for product "${product.name}"` };
+        }
+
+        const price = product.newPrice != null && product.newPrice !== "" ? product.newPrice : product.price;
+        const itemTotal = price * qty;
+        totalAmount += itemTotal;
+
+        validatedItems.push({
+            _id: product._id,
+            name: product.name,
+            image: product.image,
+            color,
+            quantity: qty,
+            displayPrice: price
+        });
+    }
+
+    totalAmount += deliveryFee;
+    return { valid: true, amount: totalAmount, validatedItems };
+};
 
 // Placing orders (authenticated user)
 const placeOrder = async (req,res) => {
     
     try {
         
-        const { userId, items, amount, address } = req.body;
+        const { userId, items, address, paymentMethod } = req.body;
+
+        if (!userId || !items || !address) {
+            return res.json({ success: false, message: "userId, items and address are required" });
+        }
+
+        const deliveryFee = 10;
+        const validation = await validateOrderItems(items, deliveryFee);
+        if (!validation.valid) {
+            return res.json({ success: false, message: validation.error });
+        }
 
         const orderData = {
             userId,
-            items,
+            items: validation.validatedItems,
             address,
-            amount,
+            amount: validation.amount,
             status: "Order Placed",
-            paymentMethod: "COD",
+            paymentMethod: paymentMethod || "COD",
             payment: false,
             date: Date.now()
         }
@@ -71,23 +129,29 @@ const placeGuestOrder = async (req,res) => {
     
     try {
         
-        const { userId, items, amount, address } = req.body;
+        const { userId, items, address, paymentMethod } = req.body;
 
-        if (!userId || !items || !amount || !address) {
-            return res.json({ success: false, message: "userId, items, amount and address are required" })
+        if (!userId || !items || !address) {
+            return res.json({ success: false, message: "userId, items and address are required" });
         }
 
         if (!String(userId).startsWith("guest-")) {
-            return res.json({ success: false, message: "Invalid guest userId" })
+            return res.json({ success: false, message: "Invalid guest userId" });
+        }
+
+        const deliveryFee = 10;
+        const validation = await validateOrderItems(items, deliveryFee);
+        if (!validation.valid) {
+            return res.json({ success: false, message: validation.error });
         }
 
         const orderData = {
             userId,
-            items,
+            items: validation.validatedItems,
             address,
-            amount,
+            amount: validation.amount,
             status: "Order Placed",
-            paymentMethod: "COD",
+            paymentMethod: paymentMethod || "COD",
             payment: false,
             date: Date.now()
         }
@@ -123,13 +187,39 @@ const placeGuestOrder = async (req,res) => {
             }).catch((err) => console.error("Order confirmation SMS failed:", err));
         }
 
-        res.json({success:true,message:"Order Placed"})
+        res.json({ success: true, message: "Order Placed", orderId: newOrder._id.toString() })
 
     } catch (error) {
         console.log(error)
         res.json({success:false,message:error.message})
     }
 
+}
+
+// Guest order lookup (no auth - verified by orderId + email)
+const trackGuestOrder = async (req, res) => {
+    try {
+        const { orderId, email } = req.body
+        if (!orderId || !email) {
+            return res.status(400).json({ success: false, message: "Order ID and email are required" })
+        }
+        const order = await orderModel.findById(orderId).lean()
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" })
+        }
+        if (!String(order.userId || "").startsWith("guest-")) {
+            return res.status(403).json({ success: false, message: "Use your account to view this order" })
+        }
+        const orderEmail = String(order.address?.email || "").trim().toLowerCase()
+        const inputEmail = String(email).trim().toLowerCase()
+        if (orderEmail !== inputEmail) {
+            return res.status(403).json({ success: false, message: "Email does not match this order" })
+        }
+        res.json({ success: true, order })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message })
+    }
 }
 
 // All Orders data for Admin Panel
@@ -205,4 +295,4 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {placeOrder, placeGuestOrder, allOrders, userOrders, updateStatus}
+export { placeOrder, placeGuestOrder, trackGuestOrder, allOrders, userOrders, updateStatus }

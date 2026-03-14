@@ -34,3 +34,21 @@ a.active hr{
         color: white;
     }
   }
+
+  @keyframes cart-badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  .cart-badge-pulse {
+    animation: cart-badge-pulse 0.4s ease-out;
+  }
+
+  /* Consistent focus styles for form controls */
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+  }
+
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: none;
+  }

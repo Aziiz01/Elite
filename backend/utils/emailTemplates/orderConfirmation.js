@@ -9,6 +9,7 @@
  * @param {Object} params.address - Delivery address
  * @param {string} params.paymentMethod - e.g. COD
  * @param {string} params.status - Order status
+ * @param {string} params.trackOrderUrl - URL to track order status
  */
 export const getOrderConfirmationTemplate = ({
     customerName,
@@ -18,7 +19,8 @@ export const getOrderConfirmationTemplate = ({
     totalAmount,
     address,
     paymentMethod,
-    status = "Order Placed"
+    status = "Order Placed",
+    trackOrderUrl
 }) => {
     const itemsRows = items
         .map(
@@ -115,6 +117,12 @@ export const getOrderConfirmationTemplate = ({
                             ${address.phone ? `<p style="margin: 8px 0 0 0; font-size: 14px;">Phone: ${escapeHtml(address.phone)}</p>` : ""}
                             <!-- Payment -->
                             <p style="margin: 24px 0 0 0; font-size: 14px; color: #666;"><strong>Payment method:</strong> ${escapeHtml(paymentMethod || "COD")}</p>
+                            ${trackOrderUrl ? `
+                            <p style="margin: 24px 0 0 0; font-size: 14px;">
+                                <a href="${escapeHtml(trackOrderUrl)}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Track your order</a>
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 13px; color: #666;">Save this link to check your order status anytime.</p>
+                            ` : ""}
                         </td>
                     </tr>
                     <!-- Footer -->

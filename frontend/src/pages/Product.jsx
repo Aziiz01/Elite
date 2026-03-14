@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
+import { useParams, Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import RelatedProducts from '../components/RelatedProducts';
 import { ReviewList, StarRating } from '../components/review';
@@ -67,8 +68,32 @@ const Product = () => {
     }
   })
 
+  if (products.length > 0 && !productData) {
+    return (
+      <div className='border-t pt-14 min-h-[50vh] flex flex-col items-center justify-center py-16 px-6 text-center'>
+        <Helmet>
+          <title>Product Not Found | Elite</title>
+        </Helmet>
+        <p className='text-gray-600 text-lg mb-2'>Product not found</p>
+        <p className='text-gray-500 text-sm mb-6'>
+          The product you're looking for doesn't exist or may have been removed.
+        </p>
+        <Link
+          to='/collection'
+          className='inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors'
+        >
+          Browse collection
+        </Link>
+      </div>
+    )
+  }
+
   return productData ? (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
+      <Helmet>
+        <title>{productData.name} | Elite</title>
+        <meta name="description" content={productData.description?.slice(0, 160) || `Shop ${productData.name} at Elite. Women's fashion and makeup.`} />
+      </Helmet>
       {/*----------- Product Data-------------- */}
       <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
 
@@ -111,14 +136,19 @@ const Product = () => {
                 <p className='text-gray-500 text-sm'>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</p>
               )}
           </div>
-          <div className='mt-5 text-3xl font-medium'>
-            {productData.newPrice != null && productData.newPrice !== '' ? (
-              <span>
-                <span className='line-through text-gray-500 text-2xl'>{currency}{productData.price}</span>
-                <span className='ml-2 text-green-600'>{currency}{productData.newPrice}</span>
-              </span>
-            ) : (
-              <span>{currency}{productData.price}</span>
+          <div className='mt-5 flex items-center gap-3 flex-wrap'>
+            <span className='text-3xl font-medium'>
+              {productData.newPrice != null && productData.newPrice !== '' ? (
+                <>
+                  <span className='line-through text-gray-500 text-2xl'>{currency}{productData.price}</span>
+                  <span className='ml-2 text-green-600'>{currency}{productData.newPrice}</span>
+                </>
+              ) : (
+                <span>{currency}{productData.price}</span>
+              )}
+            </span>
+            {productData.inStock === false && (
+              <span className='text-red-600 font-medium'>Out of stock</span>
             )}
           </div>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
@@ -150,20 +180,21 @@ const Product = () => {
           <div className='flex flex-col gap-4 mb-6'>
               <p className='text-gray-700 font-medium'>Quantity</p>
               <div className='flex items-center gap-2'>
-                <button type='button' onClick={() => setQuantity((q) => Math.max(1, q - 1))} className='w-10 h-10 border border-gray-800 flex items-center justify-center text-lg hover:bg-gray-100'>−</button>
-                <input type='number' min={1} value={quantity} onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} className='w-16 text-center border border-gray-800 py-2' />
-                <button type='button' onClick={() => setQuantity((q) => q + 1)} className='w-10 h-10 border border-gray-800 flex items-center justify-center text-lg hover:bg-gray-100'>+</button>
+                <button type='button' onClick={() => setQuantity((q) => Math.max(1, q - 1))} className='w-10 h-10 border border-gray-300 rounded flex items-center justify-center text-lg hover:bg-gray-100 focus:ring-2 focus:ring-gray-400'>−</button>
+                <input type='number' min={1} value={quantity} onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} className='w-16 text-center border border-gray-300 rounded py-2 focus:ring-2 focus:ring-gray-400 focus:border-transparent' />
+                <button type='button' onClick={() => setQuantity((q) => q + 1)} className='w-10 h-10 border border-gray-300 rounded flex items-center justify-center text-lg hover:bg-gray-100 focus:ring-2 focus:ring-gray-400'>+</button>
               </div>
           </div>
           <button
             onClick={async () => {
+              if (productData.inStock === false) return
               await addToCart(productData._id, selectedColor, quantity)
               setShowAddToCartModal(true)
             }}
-            disabled={!selectedColor}
-            className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed'
+            disabled={!selectedColor || productData.inStock === false}
+            className='bg-black text-white px-8 py-3 text-sm rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 active:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed'
           >
-            ADD TO CART
+            {productData.inStock === false ? 'OUT OF STOCK' : 'ADD TO CART'}
           </button>
           <AddToCartModal
             isOpen={showAddToCartModal}
@@ -223,7 +254,12 @@ const Product = () => {
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
 
     </div>
-  ) : <div className=' opacity-0'></div>
+  ) : (
+    <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
+      <Helmet><title>Loading | Elite</title></Helmet>
+      <p className='text-gray-500'>Loading product…</p>
+    </div>
+  )
 }
 
 export default Product

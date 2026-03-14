@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
@@ -32,8 +33,17 @@ const Cart = () => {
     }
   }, [cartItems, products])
 
+  const validCartCount = cartData.filter((item) => {
+    const p = products.find((pr) => pr._id === item._id);
+    return p && p.inStock !== false;
+  }).length;
+
   return (
     <div className='border-t pt-14'>
+      <Helmet>
+        <title>Your Cart | Elite</title>
+        <meta name="description" content="Review your cart and proceed to checkout. Cash on delivery available across Tunisia." />
+      </Helmet>
 
       <div className=' text-2xl mb-3'>
         <Title text1={'YOUR'} text2={'CART'} />
@@ -55,16 +65,37 @@ const Cart = () => {
           cartData.map((item, index) => {
 
             const productData = products.find((product) => product._id === item._id);
-            if (!productData) return null;
-
             const colorHex = /^#[0-9A-Fa-f]{6}$/.test(item.color) ? item.color : '#9ca3af';
 
+            if (!productData) {
+              return (
+                <div key={`${item._id}-${item.color}-unavailable`} className='py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4'>
+                  <div className='flex items-start gap-6'>
+                    <div className='w-16 sm:w-20 h-16 sm:h-20 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs'>—</div>
+                    <div>
+                      <p className='text-xs sm:text-lg font-medium text-gray-500'>Product no longer available</p>
+                      <p className='text-xs text-gray-400 mt-1'>Item may have been removed from the store</p>
+                    </div>
+                  </div>
+                  <span className='text-sm text-gray-400'>—</span>
+                  <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Remove" title="Remove from cart" />
+                </div>
+              );
+            }
+
+            const isOutOfStock = productData.inStock === false
+
             return (
-              <div key={index} className='py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4'>
+              <div key={`${item._id}-${item.color}`} className={`py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4 ${isOutOfStock ? 'opacity-75' : ''}`}>
                 <div className=' flex items-start gap-6'>
                   <img className='w-16 sm:w-20 object-cover' src={productData.image?.[0]} alt={productData.name} />
                   <div>
-                    <p className='text-xs sm:text-lg font-medium'>{productData.name}</p>
+                    <p className='text-xs sm:text-lg font-medium flex items-center gap-2 flex-wrap'>
+                      {productData.name}
+                      {isOutOfStock && (
+                        <span className='text-red-600 text-xs font-medium'>Out of stock</span>
+                      )}
+                    </p>
                     <div className='flex items-center gap-5 mt-2'>
                       {productData.newPrice != null && productData.newPrice !== '' ? (
                         <span>
@@ -82,8 +113,21 @@ const Cart = () => {
                     </div>
                   </div>
                 </div>
-                <input onChange={(e) => e.target.value === '' || e.target.value === '0' ? null : updateQuantity(item._id, item.color, Number(e.target.value))} className='border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' type="number" min={1} defaultValue={item.quantity} />
-                <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="Remove" />
+                <input
+                  value={item.quantity}
+                  onChange={(e) => {
+                    if (isOutOfStock) return;
+                    const v = e.target.value;
+                    if (v === '') return;
+                    const num = parseInt(v, 10);
+                    if (!isNaN(num) && num >= 0) updateQuantity(item._id, item.color, num);
+                  }}
+                  disabled={isOutOfStock}
+                  className='border border-gray-300 rounded max-w-10 sm:max-w-20 px-1 sm:px-2 py-1 focus:ring-2 focus:ring-gray-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed'
+                  type="number"
+                  min={1}
+                />
+                <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Remove" title="Remove from cart" />
               </div>
             )
           })
@@ -102,8 +146,8 @@ const Cart = () => {
                   setShowCheckoutModal(true)
                 }
               }}
-              disabled={cartData.length === 0}
-              className='bg-black text-white text-sm my-8 px-8 py-3 disabled:bg-gray-300 disabled:cursor-not-allowed'
+              disabled={validCartCount === 0}
+              className='bg-black text-white text-sm my-8 px-8 py-3 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed'
             >
               PROCEED TO CHECKOUT
             </button>

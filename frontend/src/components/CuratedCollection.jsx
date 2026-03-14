@@ -31,7 +31,7 @@ const CuratedCollection = ({ title1 = 'OUR', title2 = 'FAVORITES', category, sub
       </div>
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 gap-y-6'>
         {items.map((item) => (
-          <ProductItem key={item._id} id={item._id} name={item.name} price={item.price} newPrice={item.newPrice} image={item.image} />
+          <ProductItem key={item._id} id={item._id} name={item.name} price={item.price} newPrice={item.newPrice} image={item.image} colors={item.colors} inStock={item.inStock} />
         ))}
       </div>
     </section>

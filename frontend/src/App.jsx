@@ -8,11 +8,14 @@ import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
+import OrderStatus from './pages/OrderStatus'
 import Profile from './pages/Profile'
+import NotFound from './pages/NotFound'
 import Navbar from './components/Navbar'
 import PromoStrip from './components/PromoStrip'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
+import BackToTop from './components/BackToTop'
 const App = () => {
   return (
     <div>
@@ -29,10 +32,13 @@ const App = () => {
         <Route path='/cart' element={<Cart />} />
         <Route path='/login' element={<Login />} />
         <Route path='/place-order' element={<PlaceOrder />} />
+        <Route path='/order-status/:orderId?' element={<OrderStatus />} />
         <Route path='/orders' element={<Navigate to='/profile?section=orders' replace />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path='*' element={<NotFound />} />
         </Routes>
         <Footer />
+        <BackToTop />
       </div>
     </div>
   )

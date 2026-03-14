@@ -36,6 +36,9 @@ export const sendOrderConfirmationEmail = async ({
             timeStyle: "short"
         });
 
+        const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+        const trackOrderUrl = `${frontendUrl}/order-status/${orderId}`;
+
         const html = getOrderConfirmationTemplate({
             customerName: customerName || "Customer",
             orderId,
@@ -44,7 +47,8 @@ export const sendOrderConfirmationEmail = async ({
             totalAmount: totalAmount || 0,
             address: address || {},
             paymentMethod: paymentMethod || "COD",
-            status
+            status,
+            trackOrderUrl
         });
 
         await transporter.sendMail({

@@ -1,10 +1,19 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 
 const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
   const { currency, delivery_fee, getCartAmount } = useContext(ShopContext)
   const navigate = useNavigate()
+  const firstButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    firstButtonRef.current?.focus()
+    const handleEscape = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -29,12 +38,15 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
         onClick={handleContinueShopping}
         aria-hidden="true"
       />
-      <div className='fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none'>
+      <div className='fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none' role="presentation">
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-to-cart-modal-title"
           className='bg-white w-full max-w-md pointer-events-auto'
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 className='text-center py-6 text-base font-medium uppercase tracking-wide text-gray-900'>
+          <h2 id="add-to-cart-modal-title" className='text-center py-6 text-base font-medium uppercase tracking-wide text-gray-900'>
             Product added to your cart
           </h2>
 
@@ -78,6 +90,7 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
 
           <div className='px-6 pb-6 flex gap-3'>
             <button
+              ref={firstButtonRef}
               type='button'
               onClick={handleContinueShopping}
               className='flex-1 bg-gray-900 text-white py-3 text-sm font-medium uppercase hover:bg-gray-800 transition-colors'

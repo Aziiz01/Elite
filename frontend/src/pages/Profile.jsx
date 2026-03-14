@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { getUserProfile, updateProfile, getUserOrders, getFavoritesApi, removeFavoriteApi } from '../api/client'
@@ -107,6 +108,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
+        <Helmet><title>Loading | Elite</title></Helmet>
         <p className='text-gray-500'>Loading...</p>
       </div>
     )
@@ -116,6 +118,10 @@ const Profile = () => {
 
   return (
     <div className='border-t pt-14 pb-20'>
+      <Helmet>
+        <title>My Account | Elite</title>
+        <meta name="description" content="Manage your Elite account. Edit profile, view orders, and manage favorites." />
+      </Helmet>
       <div className='flex flex-col md:flex-row gap-8 md:gap-12'>
         {/* Sidebar */}
         <aside className='md:w-56 flex-shrink-0'>
@@ -250,7 +256,7 @@ const Profile = () => {
                     value={editForm.address}
                     onChange={onChange}
                     required
-                    className='w-full px-3 py-2 border border-gray-300'
+                    className='w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:border-transparent'
                   />
                 </div>
                 <div>
@@ -262,7 +268,7 @@ const Profile = () => {
                     onChange={onChange}
                     required
                     minLength={8}
-                    className='w-full px-3 py-2 border border-gray-300'
+                    className='w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:border-transparent'
                   />
                 </div>
                 <div>
@@ -274,13 +280,13 @@ const Profile = () => {
                     onChange={onChange}
                     minLength={8}
                     placeholder='Min 8 characters'
-                    className='w-full px-3 py-2 border border-gray-300'
+                    className='w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:border-transparent'
                   />
                 </div>
                 <button
                   type='submit'
                   disabled={saving}
-                  className='bg-black text-white px-6 py-2.5 text-sm font-medium w-fit disabled:opacity-60'
+                  className='bg-black text-white px-6 py-2.5 text-sm font-medium w-fit rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-60'
                 >
                   {saving ? 'Saving...' : 'Save changes'}
                 </button>

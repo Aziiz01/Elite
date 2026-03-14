@@ -58,13 +58,13 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder='Your comment (optional)'
-        className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3 min-h-[80px]'
+        className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3 min-h-[80px] focus:ring-2 focus:ring-gray-400 focus:border-transparent'
         rows={3}
       />
       <button
         type='submit'
         disabled={isSubmitting}
-        className='bg-black text-white text-sm px-6 py-2 disabled:opacity-50'
+        className='bg-black text-white text-sm px-6 py-2 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50'
       >
         {isSubmitting ? 'Submitting…' : 'Submit Review'}
       </button>

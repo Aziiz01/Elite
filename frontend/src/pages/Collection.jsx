@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets';
@@ -13,7 +14,7 @@ const Collection = () => {
   const [filterProducts,setFilterProducts] = useState([]);
   const [category,setCategory] = useState([]);
   const [subCategory,setSubCategory] = useState([]);
-  const [sortType,setSortType] = useState('relavent')
+  const [sortType,setSortType] = useState('relevant')
 
   const { filterCategories, filterSubcategories } = useMemo(() => {
     const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort()
@@ -21,13 +22,17 @@ const Collection = () => {
     return { filterCategories: cats, filterSubcategories: subs }
   }, [products])
 
+  const [bestsellerOnly, setBestsellerOnly] = useState(false)
+
   useEffect(() => {
     const cat = searchParams.get('category')
     const sub = searchParams.get('subCategory')
+    const best = searchParams.get('bestseller')
     if (cat) setCategory([cat])
     else setCategory([])
     if (sub) setSubCategory([sub])
     else setSubCategory([])
+    setBestsellerOnly(best === '1' || best === 'true')
   }, [searchParams])
 
   const toggleCategory = (e) => {
@@ -67,6 +72,10 @@ const Collection = () => {
       productsCopy = productsCopy.filter(item => item.subCategory && subCategory.includes(item.subCategory))
     }
 
+    if (bestsellerOnly) {
+      productsCopy = productsCopy.filter(item => item.bestseller === true)
+    }
+
     setFilterProducts(productsCopy)
 
   }
@@ -94,7 +103,7 @@ const Collection = () => {
 
   useEffect(()=>{
       applyFilter();
-  },[category,subCategory,search,showSearch,products])
+  },[category,subCategory,search,showSearch,products,bestsellerOnly])
 
   useEffect(()=>{
     sortProduct();
@@ -102,11 +111,14 @@ const Collection = () => {
 
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t'>
-      
+      <Helmet>
+        <title>All Collections | Elite</title>
+        <meta name="description" content="Browse our full collection of women's fashion and makeup. Filter by category, sort by price, and discover your next favorite piece." />
+      </Helmet>
       {/* Filter Options */}
       <div className='min-w-60'>
         <p onClick={()=>setShowFilter(!showFilter)} className='my-2 text-xl flex items-center cursor-pointer gap-2'>FILTERS
-          <img className={`h-3 sm:hidden ${showFilter ? 'rotate-90' : ''}`} src={assets.dropdown_icon} alt="" />
+          <img className={`h-3 sm:hidden ${showFilter ? 'rotate-90' : ''}`} src={assets.dropdown_icon} alt="" aria-hidden />
         </p>
         {/* Category Filter */}
         <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' :'hidden'} sm:block`}>
@@ -140,8 +152,8 @@ const Collection = () => {
         <div className='flex justify-between text-base sm:text-2xl mb-4'>
             <Title text1={'ALL'} text2={'COLLECTIONS'} />
             {/* Porduct Sort */}
-            <select onChange={(e)=>setSortType(e.target.value)} className='border-2 border-gray-300 text-sm px-2'>
-              <option value="relavent">Sort by: Relavent</option>
+            <select onChange={(e)=>setSortType(e.target.value)} className='border border-gray-300 rounded text-sm px-3 py-1.5 focus:ring-2 focus:ring-gray-400 focus:border-transparent'>
+              <option value="relevant">Sort by: Relevant</option>
               <option value="low-high">Sort by: Low to High</option>
               <option value="high-low">Sort by: High to Low</option>
             </select>
@@ -153,11 +165,11 @@ const Collection = () => {
             <div className="col-span-full flex flex-col items-center justify-center py-16 px-6 text-center">
               <p className="text-gray-600 text-lg mb-2">No products found</p>
               <p className="text-gray-500 text-sm mb-6">
-                {category.length > 0 || subCategory.length > 0 || (showSearch && search)
+                {category.length > 0 || subCategory.length > 0 || (showSearch && search) || bestsellerOnly
                   ? 'Try adjusting your filters or search.'
                   : 'There are no products in this collection yet.'}
               </p>
-              {(category.length > 0 || subCategory.length > 0 || (showSearch && search)) ? (
+              {(category.length > 0 || subCategory.length > 0 || (showSearch && search) || bestsellerOnly) ? (
                 <Link
                   to="/collection"
                   className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -175,7 +187,7 @@ const Collection = () => {
             </div>
           ) : (
             filterProducts.map((item, index) => (
-              <ProductItem key={index} name={item.name} id={item._id} price={item.price} newPrice={item.newPrice} image={item.image} />
+              <ProductItem key={index} name={item.name} id={item._id} price={item.price} newPrice={item.newPrice} image={item.image} colors={item.colors} inStock={item.inStock} />
             ))
           )}
         </div>
