@@ -1,4 +1,5 @@
 import React from 'react'
+import { Helmet } from 'react-helmet-async'
 import Hero from '../components/Hero'
 import PromoBanner from '../components/PromoBanner'
 import FeaturedCategories from '../components/FeaturedCategories'
@@ -14,6 +15,10 @@ import NewsletterBox from '../components/NewsletterBox'
 const Home = () => {
   return (
     <div>
+      <Helmet>
+        <title>Elite | Women's Fashion & Makeup</title>
+        <meta name="description" content="Elite is Tunisia's premier destination for women's fashion and makeup. Discover curated collections of elegant clothing, cosmetics, and beauty products." />
+      </Helmet>
       <Hero />
       <LatestCollection />
       <FeaturedCategories categoryNames={['Women', 'Men', 'Kids']} /> 

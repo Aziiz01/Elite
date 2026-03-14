@@ -55,6 +55,7 @@ const Footer = () => {
           <ul className='flex flex-col gap-2 text-gray-600'>
             <li><Link to='/profile' className='hover:text-gray-900'>My profile</Link></li>
             <li><Link to='/profile?section=orders' className='hover:text-gray-900'>Orders</Link></li>
+            <li><Link to='/order-status' className='hover:text-gray-900'>Track order</Link></li>
             <li><Link to='/profile?section=favorites' className='hover:text-gray-900'>Favorites</Link></li>
             <li><a href='tel:+21671234567' className='hover:text-gray-900'>+216 71 234 567</a></li>
             <li><a href='mailto:contact@elite.tn' className='hover:text-gray-900'>contact@elite.tn</a></li>

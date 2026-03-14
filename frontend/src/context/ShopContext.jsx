@@ -5,6 +5,7 @@ import {
     addToCartApi,
     updateCartApi,
     getCart,
+    mergeCartApi,
     getProducts,
     getFavoritesApi,
     addFavoriteApi,
@@ -14,16 +15,28 @@ import {
 
 export const ShopContext = createContext();
 
+const GUEST_CART_KEY = 'guestCart';
+
+const loadGuestCart = () => {
+    try {
+        const saved = localStorage.getItem(GUEST_CART_KEY);
+        return saved ? JSON.parse(saved) : {};
+    } catch {
+        return {};
+    }
+};
+
 const ShopContextProvider = (props) => {
 
     const currency = 'Dt ';
     const delivery_fee = 10;
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
-    const [cartItems, setCartItems] = useState({});
+    const [cartItems, setCartItems] = useState(loadGuestCart);
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
     const [favoriteIds, setFavoriteIds] = useState([])
+    const [cartPulse, setCartPulse] = useState(false)
     const navigate = useNavigate();
 
 
@@ -35,6 +48,7 @@ const ShopContextProvider = (props) => {
         }
 
         const qty = Math.max(1, Number(quantity) || 1);
+        const prevCart = structuredClone(cartItems);
         let cartData = structuredClone(cartItems);
 
         if (cartData[itemId]) {
@@ -50,17 +64,24 @@ const ShopContextProvider = (props) => {
             cartData[itemId][color] = qty;
         }
         setCartItems(cartData);
+        setCartPulse(true);
 
         if (token) {
             try {
                 await addToCartApi({ itemId, color, quantity: qty }, token)
             } catch (error) {
-                console.log(error)
+                setCartItems(prevCart)
+                setCartPulse(false)
                 toast.error(error?.response?.data?.message || error.message)
             }
         }
-
     }
+
+    useEffect(() => {
+        if (!cartPulse) return
+        const t = setTimeout(() => setCartPulse(false), 500)
+        return () => clearTimeout(t)
+    }, [cartPulse])
 
     const getCartCount = () => {
         let totalCount = 0;
@@ -80,17 +101,29 @@ const ShopContextProvider = (props) => {
 
     const updateQuantity = async (itemId, color, quantity) => {
 
+        const prevCart = structuredClone(cartItems);
         let cartData = structuredClone(cartItems);
 
-        cartData[itemId][color] = quantity;
+        if (!cartData[itemId] || cartData[itemId][color] === undefined) {
+            return;
+        }
 
-        setCartItems(cartData)
+        const numQty = Number(quantity);
+        if (numQty <= 0) {
+            delete cartData[itemId][color];
+            if (Object.keys(cartData[itemId]).length === 0) {
+                delete cartData[itemId];
+            }
+        } else {
+            cartData[itemId][color] = numQty;
+        }
+        setCartItems(cartData);
 
         if (token) {
             try {
-                await updateCartApi({ itemId, color, quantity }, token)
+                await updateCartApi({ itemId, color, quantity: numQty }, token)
             } catch (error) {
-                console.log(error)
+                setCartItems(prevCart)
                 toast.error(error?.response?.data?.message || error.message)
             }
         }
@@ -101,7 +134,7 @@ const ShopContextProvider = (props) => {
         let totalAmount = 0;
         for (const items in cartItems) {
             const itemInfo = products.find((product) => product._id === items);
-            if (!itemInfo) continue;
+            if (!itemInfo || itemInfo.inStock === false) continue;
             const displayPrice = (itemInfo.newPrice != null && itemInfo.newPrice !== '') ? itemInfo.newPrice : itemInfo.price;
             for (const item in cartItems[items]) {
                 try {
@@ -140,6 +173,22 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const mergeGuestCartThenLoad = async (authToken) => {
+        const guestCart = loadGuestCart()
+        const hasGuestItems = Object.keys(guestCart).some((itemId) =>
+            guestCart[itemId] && typeof guestCart[itemId] === 'object' && Object.keys(guestCart[itemId]).length > 0
+        )
+        if (hasGuestItems) {
+            try {
+                await mergeCartApi(guestCart, authToken)
+            } catch (e) {
+                console.log('Guest cart merge failed:', e)
+            }
+        }
+        localStorage.removeItem(GUEST_CART_KEY)
+        await getUserCart(authToken)
+    }
+
     const loadFavorites = async (authToken) => {
         try {
             const res = await getFavoritesApi(authToken)
@@ -155,6 +204,7 @@ const ShopContextProvider = (props) => {
         const authToken = token || localStorage.getItem('token')
         if (!authToken) {
             toast.info('Login to add favorites')
+            navigate(`/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`)
             return
         }
         const id = String(productId)
@@ -186,18 +236,28 @@ const ShopContextProvider = (props) => {
             setToken(localStorage.getItem('token'))
         }
         if (authToken) {
-            getUserCart(authToken)
+            mergeGuestCartThenLoad(authToken)
             loadFavorites(authToken)
         } else {
+            setCartItems(loadGuestCart())
             setFavoriteIds([])
         }
     }, [token])
+
+    useEffect(() => {
+        const authToken = token || localStorage.getItem('token')
+        if (!authToken) {
+            try {
+                localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cartItems))
+            } catch {}
+        }
+    }, [cartItems, token])
 
     const value = {
         products, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart, setCartItems,
-        getCartCount, updateQuantity,
+        getCartCount, updateQuantity, cartPulse,
         getCartAmount, navigate, backendUrl,
         setToken, token,
         favoriteIds, toggleFavorite, loadFavorites

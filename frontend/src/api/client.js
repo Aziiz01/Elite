@@ -63,6 +63,9 @@ export const updateCartApi = (data, token) =>
 export const getCart = (token) =>
   api.post('/api/cart/get', {}, withAuth(token));
 
+export const mergeCartApi = (cartData, token) =>
+  api.post('/api/cart/merge', { cartData }, withAuth(token));
+
 // Order APIs
 export const placeOrder = (orderData, token) =>
   api.post('/api/order/place', orderData, withAuth(token));
@@ -72,6 +75,9 @@ export const placeGuestOrder = (orderData) =>
 
 export const getUserOrders = (token) =>
   api.post('/api/order/userorders', {}, withAuth(token));
+
+export const trackGuestOrder = (orderId, email) =>
+  api.post('/api/order/track-guest', { orderId, email });
 
 // Review APIs
 export const getProductReviews = (productId) =>

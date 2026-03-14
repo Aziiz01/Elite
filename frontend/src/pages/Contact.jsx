@@ -1,4 +1,5 @@
 import React from 'react'
+import { Helmet } from 'react-helmet-async'
 import Title from '../components/Title'
 import { assets } from '../assets/assets'
 import NewsletterBox from '../components/NewsletterBox'
@@ -6,6 +7,10 @@ import NewsletterBox from '../components/NewsletterBox'
 const Contact = () => {
   return (
     <div>
+      <Helmet>
+        <title>Contact Us | Elite</title>
+        <meta name="description" content="Get in touch with Elite. Visit our store in Tunis, call us, or send an email. We're here to help with your fashion and beauty needs." />
+      </Helmet>
       
       <div className='text-center text-2xl pt-10 border-t'>
           <Title text1={'CONTACT'} text2={'US'} />
