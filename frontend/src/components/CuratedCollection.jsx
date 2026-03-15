@@ -19,22 +19,22 @@ const CuratedCollection = ({ title1 = 'OUR', title2 = 'FAVORITES', category, sub
   const viewAllTo = query ? `/collection?${query}` : '/collection'
 
   return (
-    <section className='my-10 sm:my-14'>
-      <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6'>
-        <div className='text-center sm:text-left'>
+    <div>
+      <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8'>
+        <div>
           <Title text1={title1} text2={title2} />
-          <p className='text-gray-500 text-sm mt-1'>Handpicked for you</p>
+          <p className='text-gray-500 text-sm mt-2 max-w-xl'>Handpicked for you</p>
         </div>
-        <Link to={viewAllTo} className='text-sm font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2 text-center sm:text-right'>
+        <Link to={viewAllTo} className='text-sm font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2 whitespace-nowrap'>
           View all
         </Link>
       </div>
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 gap-y-6'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6'>
         {items.map((item) => (
           <ProductItem key={item._id} id={item._id} name={item.name} price={item.price} newPrice={item.newPrice} image={item.image} colors={item.colors} inStock={item.inStock} />
         ))}
       </div>
-    </section>
+    </div>
   )
 }
 

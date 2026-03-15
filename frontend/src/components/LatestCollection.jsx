@@ -14,27 +14,24 @@ const LatestCollection = () => {
     },[products])
 
   return (
-    <section className='my-10 sm:my-14'>
-      <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6'>
-        <div className='text-center sm:text-left'>
-          <Title text1={'LATEST'} text2={'COLLECTIONS'} />
-          <p className='w-full sm:w-3/4 text-xs sm:text-sm text-gray-500 mt-1'>
+    <div>
+      <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8'>
+        <div>
+          <Title text1='LATEST' text2='COLLECTIONS' />
+          <p className='text-gray-500 text-sm mt-2 max-w-xl'>
             New arrivals and fresh styles for the season.
           </p>
         </div>
-        <Link to='/collection' className='text-sm font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2 text-center sm:text-right'>
+        <Link to='/collection' className='text-sm font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2 whitespace-nowrap'>
           View all
         </Link>
       </div>
-
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 gap-y-6'>
-        {
-          latestProducts.map((item,index)=>(
-            <ProductItem key={index} id={item._id} image={item.image} name={item.name} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} />
-          ))
-        }
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6'>
+        {latestProducts.map((item) => (
+          <ProductItem key={item._id} id={item._id} image={item.image} name={item.name} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} />
+        ))}
       </div>
-    </section>
+    </div>
   )
 }
 
