@@ -12,7 +12,12 @@ import Login from './components/Login'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export const backendUrl = import.meta.env.VITE_BACKEND_URL
+const PROD_BACKEND = 'https://elite-backend-two.vercel.app';
+const DEV_BACKEND = 'http://localhost:4000';
+const envUrl = import.meta.env.VITE_BACKEND_URL?.trim();
+export const backendUrl = import.meta.env.PROD
+  ? (envUrl && !envUrl.includes('localhost') ? envUrl : PROD_BACKEND)
+  : (envUrl || DEV_BACKEND);
 export const currency = 'Dt '
 
 const App = () => {
