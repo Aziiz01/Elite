@@ -28,9 +28,10 @@ const CARDS = [
 
 const EditorialBlock = () => {
   return (
-    <section className='my-10 sm:my-14 py-10 border-y border-gray-200'>
-      <p className='text-center text-xs font-medium tracking-widest text-gray-500 mb-8'>FOR YOU</p>
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
+    <section className='py-16 sm:py-20 border-b border-gray-200' aria-labelledby='editorial-heading'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <p id='editorial-heading' className='text-center text-xs font-medium tracking-widest text-gray-500 mb-10'>FOR YOU</p>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8'>
         {CARDS.map((card) => (
           <Link
             key={card.title}
@@ -54,6 +55,7 @@ const EditorialBlock = () => {
             </div>
           </Link>
         ))}
+      </div>
       </div>
     </section>
   )

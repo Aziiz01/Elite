@@ -26,14 +26,16 @@ const FeaturedCategories = ({ categoryNames = ['Women', 'Men', 'Kids'] }) => {
 
   if (loading) {
     return (
-      <section className='py-14 sm:py-20 border-b border-gray-200'>
-        <div className='space-y-16 sm:space-y-24'>
+      <section className='py-16 sm:py-20 md:py-24 border-b border-gray-200' aria-label='Loading categories'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='space-y-16 sm:space-y-20'>
           {[1, 2, 3].map((i) => (
             <div key={i} className='grid grid-cols-1 md:grid-cols-2 gap-0'>
               <div className='min-h-[200px] sm:min-h-[280px] bg-gray-100 animate-pulse' />
               <div className='min-h-[200px] sm:min-h-[280px] bg-gray-50' />
             </div>
           ))}
+        </div>
         </div>
       </section>
     )
@@ -42,8 +44,10 @@ const FeaturedCategories = ({ categoryNames = ['Women', 'Men', 'Kids'] }) => {
   if (categories.length === 0) return null
 
   return (
-    <section className='py-14 sm:py-20 border-b border-gray-200'>
-      <div className='space-y-16 sm:space-y-24'>
+    <section className='py-16 sm:py-20 md:py-24 border-b border-gray-200' aria-labelledby='featured-categories-heading'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <h2 id='featured-categories-heading' className='sr-only'>Shop by category</h2>
+      <div className='space-y-16 sm:space-y-20'>
         {categories.map((cat, index) => {
           const imageLeft = index % 2 === 0
           return (
@@ -65,7 +69,7 @@ const FeaturedCategories = ({ categoryNames = ['Women', 'Men', 'Kids'] }) => {
                 className={`flex flex-col justify-center px-6 py-12 sm:px-12 sm:py-16 bg-gray-50 ${imageLeft ? 'order-1 md:order-2' : 'order-1 md:order-1'}`}
               >
                 <p className='text-xs font-medium tracking-widest text-gray-500 mb-3'>DISCOVER</p>
-                <h2 className='text-2xl sm:text-3xl font-medium text-gray-900 leading-tight'>
+                <h2 className='font-display text-2xl sm:text-3xl font-semibold text-gray-900 leading-tight'>
                   {cat.name}
                 </h2>
                 {cat.description && (
@@ -84,6 +88,7 @@ const FeaturedCategories = ({ categoryNames = ['Women', 'Men', 'Kids'] }) => {
             </div>
           )
         })}
+      </div>
       </div>
     </section>
   )

@@ -15,7 +15,7 @@ const NewsletterBox = () => {
   }
 
   return (
-    <section className='relative py-14 sm:py-20 min-h-[320px] flex items-center justify-center overflow-hidden'>
+    <section className='relative py-20 sm:py-24 md:py-28 min-h-[340px] flex items-center justify-center overflow-hidden' aria-label='Newsletter signup'>
       <img
         src={pexelsImages.womanPinkEyeshadowWide}
         alt=""

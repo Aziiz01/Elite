@@ -11,26 +11,56 @@ import VideoSection from '../components/VideoSection'
 import EditorialBlock from '../components/EditorialBlock'
 import OurPolicy from '../components/OurPolicy'
 import NewsletterBox from '../components/NewsletterBox'
+import Section from '../components/Section'
 
 const Home = () => {
   return (
-    <div>
+    <main className='home'>
       <Helmet>
         <title>Elite | Women's Fashion & Makeup</title>
         <meta name="description" content="Elite is Tunisia's premier destination for women's fashion and makeup. Discover curated collections of elegant clothing, cosmetics, and beauty products." />
       </Helmet>
+
+      {/* 1. Hero – main banner / key promotion */}
       <Hero />
-      <LatestCollection />
-      <FeaturedCategories categoryNames={['Women', 'Men', 'Kids']} /> 
-      <BestSeller />
-      <CuratedCollection title1="DISCOVER" title2="WOMEN'S TOPWEAR" category="Yeux" subCategory="Eye Liner" limit={4} />
-      <PromoBanner />
-      <FeaturedImageSection />
+{/* 3. Featured / trending products */}
+<Section id="new-arrivals" spacing="lg" width="normal">
+        <LatestCollection />
+      </Section>
+      {/* 2. Featured categories */}
+      <FeaturedCategories categoryNames={['Women', 'Men', 'Kids']} />
+
+      
+  {/* 6. Best sellers / recommended */}
+  <Section id="best-sellers" spacing="lg" width="normal">
+        <BestSeller />
+      </Section>
+      {/* 8. Brand story / video */}
       <VideoSection />
+{/* 7. Curated / recommended products */}
+<Section id="recommended" spacing="lg" width="normal">
+        <CuratedCollection title1="RECOMMENDED" title2="FOR YOU" limit={4} />
+      </Section>
+      {/* 4. Promotional section */}
+      <PromoBanner />
+
+      {/* 5. Brand highlight */}
+      <FeaturedImageSection />
+
+    
+
+      
+
+      
+      {/* 9. Editorial / trust content */}
       <EditorialBlock />
+
+      {/* 10. Trust badges / policies */}
       <OurPolicy />
+
+      {/* 11. Newsletter / footer transition */}
       <NewsletterBox />
-    </div>
+    </main>
   )
 }
 
