@@ -25,7 +25,10 @@ function validateEnv() {
     }
 }
 
-const PRODUCTION_ORIGINS = ['https://elite-admin-one.vercel.app']
+const PRODUCTION_ORIGINS = [
+    'https://elite-admin-one.vercel.app',
+    'https://elite-ecru-alpha.vercel.app'
+]
 
 /**
  * Get CORS allowed origins.
