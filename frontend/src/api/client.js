@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL
+  || (import.meta.env.PROD ? 'https://elite-backend-two.vercel.app' : 'http://localhost:4000');
 
 const api = axios.create({
   baseURL: BASE_URL,
