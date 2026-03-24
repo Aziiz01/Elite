@@ -28,10 +28,10 @@ const OrderStatus = () => {
         setOrderIdInput(id.trim())
         setEmailInput(email.trim())
       } else {
-        setError(res.data.message || 'Could not find order')
+        setError(res.data.message || 'Commande introuvable')
       }
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Could not load order'
+      const msg = err.response?.data?.message || err.message || 'Impossible de charger la commande'
       setError(msg)
       setOrder(null)
     } finally {
@@ -53,21 +53,21 @@ const OrderStatus = () => {
   return (
     <div className='border-t pt-14 pb-20'>
       <Helmet>
-        <title>Track Order | Elite</title>
-        <meta name="description" content="Track your Elite order. Enter your order ID and email to view status." />
+        <title>Suivre ma commande | Elite</title>
+        <meta name="description" content="Suivez votre commande Elite. Entrez votre numéro de commande et e-mail." />
       </Helmet>
       <div className='mb-6'>
-        <Title text1='TRACK' text2='ORDER' />
+        <Title text1='SUIVRE' text2='COMMANDE' />
       </div>
 
       {!order ? (
         <div className='max-w-md'>
           <p className='text-gray-600 mb-4'>
-            Enter your order ID and email to view your order status. You can find the order ID in your confirmation email.
+            Entrez votre numéro de commande et e-mail pour voir le statut. Le numéro se trouve dans l'e-mail de confirmation.
           </p>
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Order ID</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Numéro de commande</label>
               <input
                 type='text'
                 value={orderIdInput}
@@ -78,12 +78,12 @@ const OrderStatus = () => {
               />
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>E-mail</label>
               <input
                 type='email'
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
-                placeholder='Email used when placing the order'
+                placeholder="E-mail utilisé lors de la commande"
                 className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400'
                 required
               />
@@ -96,7 +96,7 @@ const OrderStatus = () => {
               disabled={loading}
               className='px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {loading ? 'Checking...' : 'View order'}
+              {loading ? 'Recherche...' : 'Voir la commande'}
             </button>
           </form>
         </div>
@@ -105,26 +105,26 @@ const OrderStatus = () => {
           <div className='border border-gray-200 rounded-lg overflow-hidden'>
             <div className='bg-gray-50 px-6 py-4 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center'>
               <div>
-                <p className='text-xs text-gray-500'>Order ID</p>
+                <p className='text-xs text-gray-500'>Numéro de commande</p>
                 <p className='font-mono text-sm text-gray-800' title={order._id}>#{String(order._id).slice(-8)}</p>
-                <p className='text-xs text-gray-400 mt-0.5'>Save this ID to track later: {order._id}</p>
+                <p className='text-xs text-gray-400 mt-0.5'>Conservez ce numéro pour suivre la commande : {order._id}</p>
               </div>
               <div>
                 <p className='text-xs text-gray-500'>Date</p>
                 <p className='text-sm font-medium'>{new Date(order.date).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className='text-xs text-gray-500'>Status</p>
+                <p className='text-xs text-gray-500'>Statut</p>
                 <p className='text-sm font-medium text-gray-900'>{order.status}</p>
               </div>
               <div>
                 <p className='text-xs text-gray-500'>Total</p>
-                <p className='text-sm font-medium'>{currency}{order.amount}</p>
+                <p className='text-sm font-medium'>{order.amount}{currency}</p>
               </div>
             </div>
 
             <div className='p-6'>
-              <p className='text-sm font-medium text-gray-700 mb-3'>Items</p>
+              <p className='text-sm font-medium text-gray-700 mb-3'>Articles</p>
               <ul className='space-y-3'>
                 {(order.items || []).map((item, i) => (
                   <li key={i} className='flex gap-4 items-center border-b border-gray-100 pb-3 last:border-0'>
@@ -141,7 +141,7 @@ const OrderStatus = () => {
                       </p>
                     </div>
                     <p className='font-medium'>
-                      {currency}{(item.displayPrice ?? item.newPrice ?? item.price) * (item.quantity || 1)}
+                      {(item.displayPrice ?? item.newPrice ?? item.price) * (item.quantity || 1)}{currency}
                     </p>
                   </li>
                 ))}
@@ -150,7 +150,7 @@ const OrderStatus = () => {
 
             {order.address && (
               <div className='px-6 pb-6'>
-                <p className='text-sm font-medium text-gray-700 mb-2'>Delivery address</p>
+                <p className='text-sm font-medium text-gray-700 mb-2'>Adresse de livraison</p>
                 <p className='text-sm text-gray-600'>
                   {[order.address.firstName, order.address.lastName].filter(Boolean).join(' ')}<br />
                   {order.address.street}<br />
@@ -166,13 +166,13 @@ const OrderStatus = () => {
             onClick={() => { setOrder(null); setError(null) }}
             className='mt-6 text-sm text-gray-600 hover:text-gray-900 underline'
           >
-            Look up another order
+            Rechercher une autre commande
           </button>
         </div>
       )}
 
       <p className='mt-8 text-sm text-gray-500'>
-        <Link to='/collection' className='hover:text-gray-900 underline'>Continue shopping</Link>
+        <Link to='/collection' className='hover:text-gray-900 underline'>Continuer mes achats</Link>
       </p>
     </div>
   )

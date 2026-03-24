@@ -8,6 +8,8 @@ import Orders from './pages/Orders'
 import Edit from './pages/Edit'
 import Users from './pages/Users'
 import Categories from './pages/Categories'
+import Newsletter from './pages/Newsletter'
+import HeroSection from './pages/HeroSection'
 import Login from './components/Login'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,7 +20,7 @@ const envUrl = import.meta.env.VITE_BACKEND_URL?.trim();
 export const backendUrl = import.meta.env.PROD
   ? (envUrl && !envUrl.includes('localhost') ? envUrl : PROD_BACKEND)
   : (envUrl || DEV_BACKEND);
-export const currency = 'Dt '
+export const currency = ' Dt'
 
 const App = () => {
 
@@ -46,6 +48,8 @@ const App = () => {
                 <Route path='/orders' element={<Orders token={token} />} />
                 <Route path='/users' element={<Users token={token} />} />
                 <Route path='/categories' element={<Categories token={token} />} />
+                <Route path='/newsletter' element={<Newsletter token={token} />} />
+                <Route path='/hero' element={<HeroSection token={token} />} />
               </Routes>
             </div>
           </div>

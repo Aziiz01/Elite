@@ -10,8 +10,8 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const userName = review.userId
-    ? [review.userId.firstName, review.userId.lastName].filter(Boolean).join(' ') || 'Anonymous'
-    : 'Anonymous'
+    ? [review.userId.firstName, review.userId.lastName].filter(Boolean).join(' ') || 'Anonyme'
+    : 'Anonyme'
 
   const handleUpdate = async () => {
     setIsSubmitting(true)
@@ -21,11 +21,11 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
         token
       )
       if (res.data.success) {
-        toast.success('Review updated')
+        toast.success('Avis mis à jour')
         onUpdate?.(res.data.review)
         setIsEditing(false)
       } else {
-        toast.error(res.data.message || 'Update failed')
+        toast.error(res.data.message || 'Échec de la mise à jour')
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message)
@@ -35,15 +35,15 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete your review?')) return
+    if (!window.confirm('Supprimer votre avis ?')) return
     setIsSubmitting(true)
     try {
       const res = await deleteReviewApi({ reviewId: review._id }, token)
       if (res.data.success) {
-        toast.success('Review deleted')
+        toast.success('Avis supprimé')
         onDelete?.(review._id)
       } else {
-        toast.error(res.data.message || 'Delete failed')
+        toast.error(res.data.message || 'Échec de la suppression')
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message)
@@ -59,7 +59,7 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
   if (isEditing) {
     return (
       <div className='border-b border-gray-200 py-4 last:border-0'>
-        <p className='text-sm font-medium text-gray-800 mb-2'>Edit your review</p>
+        <p className='text-sm font-medium text-gray-800 mb-2'>Modifier votre avis</p>
         <div className='flex gap-2 mb-2'>
           {[1, 2, 3, 4, 5].map((i) => (
             <button
@@ -75,7 +75,7 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
         <textarea
           value={editComment}
           onChange={(e) => setEditComment(e.target.value)}
-          placeholder='Your comment (optional)'
+          placeholder='Votre commentaire (optionnel)'
           className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-2 min-h-[60px]'
           rows={2}
         />
@@ -85,14 +85,14 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
             disabled={isSubmitting}
             className='bg-black text-white text-xs px-4 py-2 disabled:opacity-50'
           >
-            {isSubmitting ? 'Saving…' : 'Save'}
+            {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
           </button>
           <button
             onClick={() => setIsEditing(false)}
             disabled={isSubmitting}
             className='border border-gray-400 text-xs px-4 py-2'
           >
-            Cancel
+            Annuler
           </button>
         </div>
       </div>
@@ -121,14 +121,14 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
               disabled={isSubmitting}
               className='text-xs text-gray-600 hover:text-black underline'
             >
-              Edit
+              Modifier
             </button>
             <button
               onClick={handleDelete}
               disabled={isSubmitting}
               className='text-xs text-red-600 hover:text-red-700 underline'
             >
-              Delete
+              Supprimer
             </button>
           </div>
         )}

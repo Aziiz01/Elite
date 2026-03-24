@@ -14,6 +14,8 @@ import orderRouter from './routes/orderRoute.js'
 import reviewRouter from './routes/reviewRoute.js'
 import categoryRouter from './routes/categoryRoute.js'
 import favoriteRouter from './routes/favoriteRoute.js'
+import newsletterRouter from './routes/newsletterRoute.js'
+import heroRouter from './routes/heroRoute.js'
 
 validateEnv()
 
@@ -47,6 +49,14 @@ app.use('/api/user/login', authLimiter)
 app.use('/api/user/admin', authLimiter)
 app.use('/api/user/register', authLimiter)
 
+const newsletterSubscribeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false
+})
+app.use('/api/newsletter/subscribe', newsletterSubscribeLimiter)
+
 // Security: CORS - restrict to allowed origins
 app.use(cors({
     origin: getCorsOrigins(),
@@ -67,6 +77,8 @@ app.use('/api/order',orderRouter)
 app.use('/api/review',reviewRouter)
 app.use('/api/category',categoryRouter)
 app.use('/api/favorite',favoriteRouter)
+app.use('/api/newsletter', newsletterRouter)
+app.use('/api/hero', heroRouter)
 
 app.get('/', (req, res) => {
     res.send("API Working")
@@ -98,7 +110,7 @@ app.use((err, req, res, next) => {
     if (res.headersSent) return next(err)
 
     if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ success: false, message: 'File too large. Max size: 5MB.' })
+        return res.status(400).json({ success: false, message: 'File too large. Max: 5MB for product images, 50MB for hero videos.' })
     }
     if (err.message && err.message.startsWith('Invalid file type')) {
         return res.status(400).json({ success: false, message: err.message })

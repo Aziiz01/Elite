@@ -13,7 +13,7 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!rating || rating < 1 || rating > 5) {
-      toast.error('Please select a rating (1–5 stars)')
+      toast.error('Veuillez choisir une note (1 à 5 étoiles)')
       return
     }
     setIsSubmitting(true)
@@ -23,12 +23,12 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
         token
       )
       if (res.data.success) {
-        toast.success('Review added!')
+        toast.success('Avis ajouté !')
         setRating(0)
         setComment('')
         onSuccess?.(res.data.review)
       } else {
-        toast.error(res.data.message || 'Failed to add review')
+        toast.error(res.data.message || 'Échec de l\'ajout de l\'avis')
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message)
@@ -39,7 +39,7 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className='border border-gray-200 rounded p-4 bg-gray-50'>
-      <p className='text-sm font-medium text-gray-800 mb-2'>Write a review</p>
+      <p className='text-sm font-medium text-gray-800 mb-2'>Écrire un avis</p>
       <div className='flex gap-1 mb-3'>
         {[1, 2, 3, 4, 5].map((i) => (
           <button
@@ -57,7 +57,7 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder='Your comment (optional)'
+        placeholder='Votre commentaire (optionnel)'
         className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3 min-h-[80px] focus:ring-2 focus:ring-gray-400 focus:border-transparent'
         rows={3}
       />
@@ -66,7 +66,7 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
         disabled={isSubmitting}
         className='bg-black text-white text-sm px-6 py-2 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50'
       >
-        {isSubmitting ? 'Submitting…' : 'Submit Review'}
+        {isSubmitting ? 'Envoi…' : 'Publier'}
       </button>
     </form>
   )

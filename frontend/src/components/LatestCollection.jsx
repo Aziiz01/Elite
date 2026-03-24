@@ -28,7 +28,8 @@ const LatestCollection = () => {
       </div>
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6'>
         {latestProducts.map((item) => (
-          <ProductItem key={item._id} id={item._id} image={item.image} name={item.name} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} />
+          <ProductItem key={item._id} id={item._id} image={item.image} name={item.name} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} date={item.date} isNew={item.isNew} subCategory={item.subCategory} category={item.category} rating={item.avgRating}
+              reviewCount={item.reviewCount} />
         ))}
       </div>
     </div>

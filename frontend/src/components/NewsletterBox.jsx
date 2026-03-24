@@ -1,17 +1,28 @@
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import { pexelsImages } from '../constants/images'
+import { subscribeNewsletter } from '../api/client'
 
 const NewsletterBox = () => {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const onSubmitHandler = (event) => {
+  const onSubmitHandler = async (event) => {
     event.preventDefault()
     if (!email.trim()) return
-    setSubmitted(true)
-    setEmail('')
-    toast.success('Thank you for subscribing!')
+    setLoading(true)
+    try {
+      await subscribeNewsletter(email.trim())
+      setSubmitted(true)
+      setEmail('')
+      toast.success('Merci de vous être abonné !')
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Échec de l\'inscription. Veuillez réessayer.'
+      toast.error(msg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -26,16 +37,16 @@ const NewsletterBox = () => {
       <div className='relative text-center max-w-xl mx-auto px-4'>
         {submitted ? (
           <>
-            <p className='text-xl sm:text-2xl font-medium text-white'>Thank you for subscribing!</p>
+            <p className='text-xl sm:text-2xl font-medium text-white'>Merci de vous être abonné !</p>
             <p className='text-gray-200 mt-2 text-sm'>
-              We'll send you exclusive offers and style tips.
+              Offres exclusives et conseils mode dans votre boîte mail.
             </p>
           </>
         ) : (
           <>
-            <p className='text-xl sm:text-2xl font-medium text-white'>Subscribe & get 20% off</p>
+            <p className='text-xl sm:text-2xl font-medium text-white'>Abonnez-vous et obtenez 20 % de réduction</p>
             <p className='text-gray-200 mt-2 text-sm'>
-              New arrivals, exclusive offers, and style tips—delivered to your inbox.
+              Nouveautés, offres exclusives et conseils mode dans votre boîte mail.
             </p>
             <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row gap-3 mt-6'>
               <input
@@ -43,11 +54,11 @@ const NewsletterBox = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className='flex-1 border border-gray-300 rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-white focus:border-transparent bg-white/95'
                 type="email"
-                placeholder='Enter your email'
+                placeholder='Entrez votre e-mail'
                 required
               />
-              <button type='submit' className='bg-white text-gray-900 text-sm font-medium px-6 py-3 hover:bg-gray-100 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent'>
-                SUBSCRIBE
+              <button type='submit' disabled={loading} className='bg-white text-gray-900 text-sm font-medium px-6 py-3 hover:bg-gray-100 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-70 disabled:cursor-not-allowed'>
+                {loading ? 'Inscription...' : "S'ABONNER"}
               </button>
             </form>
           </>

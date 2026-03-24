@@ -29,7 +29,8 @@ const BestSeller = () => {
       </div>
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6'>
         {bestSeller.map((item) => (
-          <ProductItem key={item._id} id={item._id} name={item.name} image={item.image} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} />
+          <ProductItem key={item._id} id={item._id} name={item.name} image={item.image} price={item.price} newPrice={item.newPrice} colors={item.colors} inStock={item.inStock} date={item.date} isNew={item.isNew} subCategory={item.subCategory} category={item.category} rating={item.avgRating}
+              reviewCount={item.reviewCount} />
         ))}
       </div>
     </div>

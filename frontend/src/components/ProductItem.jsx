@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { Link } from 'react-router-dom'
 import AddToCartModal from './AddToCartModal'
+import StarRating from './review/StarRating'
 
 const HeartOutline = () => (
   <svg className='w-4 h-4 sm:w-[18px] sm:h-[18px]' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={1.5}>
@@ -21,10 +22,14 @@ const CartIcon = () => (
   </svg>
 )
 
-const ProductItem = ({ id, image, name, price, newPrice, colors, inStock = true }) => {
+
+const ProductItem = ({ id, image, name, price, newPrice, colors, inStock = true, isNew, date, subCategory, category, rating, reviewCount }) => {
   const { currency, favoriteIds, toggleFavorite, addToCart } = useContext(ShopContext)
   const [showAddToCartModal, setShowAddToCartModal] = useState(false)
   const isFavorited = favoriteIds.includes(String(id))
+
+  const showNew = isNew ?? (date && (Date.now() - Number(date)) < 24 * 60 * 60 * 1000)
+  const showDeal = newPrice != null && newPrice !== '' && Number(newPrice) < Number(price)
 
   const handleHeartClick = (e) => {
     e.preventDefault()
@@ -47,7 +52,15 @@ const ProductItem = ({ id, image, name, price, newPrice, colors, inStock = true 
       className='text-gray-700 cursor-pointer flex flex-col h-full group/card'
       to={`/product/${id}`}
     >
-      <div className='relative w-full aspect-square overflow-hidden bg-gray-50 flex-shrink-0'>
+      <div className='relative w-full aspect-[3/4] overflow-hidden bg-gray-100 flex-shrink-0'>
+        <div className='absolute left-2 top-2 sm:left-3 sm:top-3 z-10 flex flex-wrap gap-1'>
+          {showNew && (
+            <span className='px-2 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white bg-[#1a1a1a]'>Nouveau</span>
+          )}
+          {showDeal && (
+            <span className='px-2 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white bg-[#1a1a1a]'>Promo</span>
+          )}
+        </div>
         <img
           className={`w-full h-full object-contain group-hover/card:scale-110 transition ease-in-out duration-300 ${!inStock ? 'opacity-60' : ''}`}
           src={image?.[0]}
@@ -55,43 +68,52 @@ const ProductItem = ({ id, image, name, price, newPrice, colors, inStock = true 
         />
         {!inStock && (
           <span className='absolute inset-0 flex items-center justify-center bg-black/40 text-white text-sm font-medium'>
-            Out of stock
+            Rupture de stock
           </span>
         )}
-        {inStock && (
+        <div className={`absolute bottom-2 left-2 right-2 sm:left-3 sm:right-3 sm:bottom-3 flex items-center z-10 opacity-100 sm:opacity-0 sm:group-hover/card:opacity-100 transition-opacity duration-200 ${inStock ? 'justify-between' : 'justify-end'}`}>
+          {inStock && (
+            <button
+              type='button'
+              onClick={handleCartClick}
+              aria-label='Ajouter au panier'
+              className='w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white/90 shadow-sm hover:bg-white text-gray-600 hover:text-gray-900'
+            >
+              <CartIcon />
+            </button>
+          )}
           <button
             type='button'
-            onClick={handleCartClick}
-            aria-label='Add to cart'
-            className='absolute left-2 top-2 sm:left-3 sm:top-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white/90 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/card:opacity-100 transition-opacity duration-200 hover:bg-white text-gray-600 hover:text-gray-900'
+            onClick={handleHeartClick}
+            aria-label={isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white/90 shadow-sm hover:bg-white ${isFavorited ? 'text-pink-500' : 'text-gray-700 hover:text-pink-500'}`}
           >
-            <CartIcon />
+            {isFavorited ? <HeartFilled /> : <HeartOutline />}
           </button>
-        )}
-        <button
-          type='button'
-          onClick={handleHeartClick}
-          aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-          className={`absolute right-2 top-2 sm:right-3 sm:top-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white/90 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/card:opacity-100 transition-opacity duration-200 hover:bg-white ${isFavorited ? 'text-pink-500' : 'text-gray-700 hover:text-pink-500'}`}
-        >
-          {isFavorited ? <HeartFilled /> : <HeartOutline />}
-        </button>
+        </div>
       </div>
-      <div className='pt-3 pb-1 flex-1 min-h-0'>
-        <p className='text-sm line-clamp-2'>{name}</p>
-      </div>
-      <div className='text-sm font-medium mt-auto flex items-center gap-2 flex-wrap'>
-        {newPrice != null && newPrice !== '' ? (
-          <span>
-            <span className='line-through text-gray-500'>{currency}{price}</span>
-            <span className='ml-1 text-green-600'>{currency}{newPrice}</span>
-          </span>
-        ) : (
-          <span>{currency}{price}</span>
+      <div className='pt-4 pb-2 flex-1 min-h-0 flex flex-col text-left'>
+        <p className='font-medium text-gray-900 line-clamp-2 text-base leading-snug'>{name}</p>
+        {(subCategory || category) && (
+          <p className='text-sm text-gray-500 mt-1'>{subCategory || category}</p>
         )}
-        {!inStock && (
-          <span className='text-red-600 text-xs font-medium'>Out of stock</span>
-        )}
+        <div className='mt-2 flex items-center gap-1.5'>
+          <StarRating rating={rating ?? 0} size='sm' />
+          <span className='text-xs text-gray-500'>({reviewCount ?? 0})</span>
+        </div>
+        <div className='mt-auto pt-3'>
+          {newPrice != null && newPrice !== '' ? (
+            <span className='font-semibold text-gray-900'>
+              <span className='line-through text-gray-400 font-normal text-sm'>{price}{currency}</span>
+              <span className='ml-1.5 text-gray-900'>{newPrice}{currency}</span>
+            </span>
+          ) : (
+            <span className='font-semibold text-gray-900'>{price}{currency}</span>
+          )}
+          {!inStock && (
+            <span className='text-red-600 text-xs font-medium ml-1'>Rupture de stock</span>
+          )}
+        </div>
       </div>
       <AddToCartModal
         isOpen={showAddToCartModal}

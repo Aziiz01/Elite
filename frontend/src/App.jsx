@@ -16,12 +16,19 @@ import PromoStrip from './components/PromoStrip'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
 import BackToTop from './components/BackToTop'
+import ScrollToTop from './components/ScrollToTop'
+
 const App = () => {
   return (
     <div>
+      <ScrollToTop />
       <PromoStrip />
+      <header className='sticky top-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-gray-200'>
+        <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+          <Navbar />
+        </div>
+      </header>
       <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-        <Navbar />
         <SearchBar />
         <Routes>
         <Route path='/' element={<Home />} />

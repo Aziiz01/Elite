@@ -73,11 +73,12 @@ const PlaceOrder = () => {
         setFormData(data => ({ ...data, [name]: value }))
     }
 
+    const FIELD_LABELS = { firstName: 'prénom', lastName: 'nom', email: 'e-mail', street: 'rue', city: 'ville', state: 'région', zipcode: 'code postal', country: 'pays', phone: 'téléphone' }
     const validateForm = () => {
         for (const field of REQUIRED_FIELDS) {
             const val = formData[field]
             if (val == null || String(val).trim() === '') {
-                toast.error(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase().trim()}`)
+                toast.error(`Veuillez remplir le champ ${FIELD_LABELS[field] || field}`)
                 return false
             }
         }
@@ -111,11 +112,11 @@ const PlaceOrder = () => {
             }
 
             if (orderItems.length === 0) {
-                toast.error(skippedCount > 0 ? 'No valid items in cart. Some products may no longer be available.' : 'Your cart is empty')
+                toast.error(skippedCount > 0 ? 'Aucun article valide dans le panier. Certains produits sont peut-être indisponibles.' : 'Votre panier est vide')
                 return
             }
             if (skippedCount > 0) {
-                toast.info(`${skippedCount} unavailable item(s) were excluded from your order`)
+                toast.info(`${skippedCount} article(s) indisponible(s) exclu(s) de votre commande`)
             }
 
             const amount = getCartAmount() + delivery_fee
@@ -135,17 +136,17 @@ const PlaceOrder = () => {
                 if (response.data.success) {
                     const orderId = response.data.orderId
                     setCartItems({})
-                    toast.success('Order placed successfully')
+                    toast.success('Commande passée avec succès')
                     navigate(`/order-status/${orderId}`, { state: { email: formData.email } })
                 } else {
-                    toast.error(response.data.message || 'Failed to place order')
+                    toast.error(response.data.message || 'Échec de la commande')
                 }
                 return
             }
 
             const authToken = token || localStorage.getItem('token')
             if (!authToken) {
-                toast.error('Please login to place order')
+                toast.error('Veuillez vous connecter pour passer commande')
                 navigate('/login', { state: { redirect: '/place-order' } })
                 return
             }
@@ -171,35 +172,35 @@ const PlaceOrder = () => {
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
             <Helmet>
-                <title>Checkout | Elite</title>
-                <meta name="description" content="Complete your order. Enter delivery details. Cash on delivery available." />
+                <title>Paiement | Elite</title>
+                <meta name="description" content="Finalisez votre commande. Paiement à la livraison disponible." />
             </Helmet>
             {/* ------------- Left Side ---------------- */}
             <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
 
                 {isGuest && (
                     <p className='text-sm text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded'>
-                        Checking out as guest. Please fill in all required information.
+                        Commande en tant qu'invité. Veuillez remplir toutes les informations requises.
                     </p>
                 )}
                 <div className='text-xl sm:text-2xl my-3'>
-                    <Title text1={'DELIVERY'} text2={'INFORMATION'} />
+                    <Title text1={'INFORMATIONS'} text2={'LIVRAISON'} />
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='First name' />
-                    <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Last name' />
+                    <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Prénom' />
+                    <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Nom' />
                 </div>
-                <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="email" placeholder='Email address' />
-                <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Street' />
+                <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="email" placeholder='E-mail' />
+                <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Rue' />
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='City' />
-                    <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='State' />
+                    <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Ville' />
+                    <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Région' />
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Zipcode' />
-                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Country' />
+                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Code postal' />
+                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Pays' />
                 </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Phone' />
+                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Téléphone' />
             </div>
 
             {/* ------------- Right Side ------------------ */}
@@ -210,14 +211,14 @@ const PlaceOrder = () => {
                 </div>
 
                 <div className='mt-12'>
-                    <p className='text-sm text-gray-600 mb-4'>Cash on Delivery — Pay when your order arrives.</p>
+                    <p className='text-sm text-gray-600 mb-4'>Paiement à la livraison — Payez à la réception de votre commande.</p>
                     <div className='w-full text-end'>
                         <button
                             type='submit'
                             disabled={submitting}
                             className='bg-black text-white px-16 py-3 text-sm rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed'
                         >
-                            {submitting ? 'Placing order…' : 'PLACE ORDER'}
+                            {submitting ? 'Envoi en cours…' : 'PASSER COMMANDE'}
                         </button>
                     </div>
                 </div>

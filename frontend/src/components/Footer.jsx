@@ -22,16 +22,16 @@ const Footer = () => {
         <div>
           <img src={assets.logo} className='mb-5 w-32' alt="Elite" />
           <p className='w-full sm:max-w-xs text-gray-600'>
-            Elite is Tunisia's premier destination for women's fashion and makeup. Discover curated collections that celebrate elegance and empower your unique style.
+            Elite est la destination incontournable en Tunisie pour la mode féminine et le maquillage. Découvrez des collections soigneusement sélectionnées qui célèbrent l'élégance et subliment votre style.
           </p>
         </div>
 
         <div>
-          <p className='text-base font-medium text-gray-900 mb-4'>SHOP</p>
+          <p className='text-base font-medium text-gray-900 mb-4'>BOUTIQUE</p>
           <ul className='flex flex-col gap-2 text-gray-600'>
-            <li><Link to='/collection' className='hover:text-gray-900'>All collections</Link></li>
-            <li><Link to='/collection' className='hover:text-gray-900'>New arrivals</Link></li>
-            <li><Link to='/collection' className='hover:text-gray-900'>Best sellers</Link></li>
+            <li><Link to='/collection' className='hover:text-gray-900'>Toutes les collections</Link></li>
+            <li><Link to='/collection' className='hover:text-gray-900'>Nouveautés</Link></li>
+            <li><Link to='/collection' className='hover:text-gray-900'>Meilleures ventes</Link></li>
             {CATEGORIES.map((cat) => (
               <li key={cat.name}>
                 <Link to={`/collection?category=${encodeURIComponent(cat.name)}`} className='hover:text-gray-900'>{cat.name}</Link>
@@ -41,22 +41,22 @@ const Footer = () => {
         </div>
 
         <div>
-          <p className='text-base font-medium text-gray-900 mb-4'>OUR COMPANY</p>
+          <p className='text-base font-medium text-gray-900 mb-4'>NOTRE ENTREPRISE</p>
           <ul className='flex flex-col gap-2 text-gray-600'>
-            <li><Link to='/about' className='hover:text-gray-900'>About us</Link></li>
-            <li><Link to='/contact' className='hover:text-gray-900'>Contact us</Link></li>
-            <li><Link to='/about' className='hover:text-gray-900'>Delivery</Link></li>
-            <li><Link to='/about' className='hover:text-gray-900'>Returns & exchanges</Link></li>
+            <li><Link to='/about' className='hover:text-gray-900'>À propos</Link></li>
+            <li><Link to='/contact' className='hover:text-gray-900'>Nous contacter</Link></li>
+            <li><Link to='/about' className='hover:text-gray-900'>Livraison</Link></li>
+            <li><Link to='/about' className='hover:text-gray-900'>Retours et échanges</Link></li>
           </ul>
         </div>
 
         <div>
-          <p className='text-base font-medium text-gray-900 mb-4'>YOUR ACCOUNT</p>
+          <p className='text-base font-medium text-gray-900 mb-4'>VOTRE COMPTE</p>
           <ul className='flex flex-col gap-2 text-gray-600'>
-            <li><Link to='/profile' className='hover:text-gray-900'>My profile</Link></li>
-            <li><Link to='/profile?section=orders' className='hover:text-gray-900'>Orders</Link></li>
-            <li><Link to='/order-status' className='hover:text-gray-900'>Track order</Link></li>
-            <li><Link to='/profile?section=favorites' className='hover:text-gray-900'>Favorites</Link></li>
+            <li><Link to='/profile' className='hover:text-gray-900'>Mon profil</Link></li>
+            <li><Link to='/profile?section=orders' className='hover:text-gray-900'>Commandes</Link></li>
+            <li><Link to='/order-status' className='hover:text-gray-900'>Suivre ma commande</Link></li>
+            <li><Link to='/profile?section=favorites' className='hover:text-gray-900'>Favoris</Link></li>
             <li><a href='tel:+21671234567' className='hover:text-gray-900'>+216 71 234 567</a></li>
             <li><a href='mailto:contact@elite.tn' className='hover:text-gray-900'>contact@elite.tn</a></li>
           </ul>
@@ -74,7 +74,7 @@ const Footer = () => {
               </a>
             ))}
           </div>
-          <p className='text-sm text-gray-500'>© 2024 Elite. All Rights Reserved.</p>
+          <p className='text-sm text-gray-500'>© 2024 Elite. Tous droits réservés.</p>
         </div>
       </div>
 

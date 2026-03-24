@@ -3,6 +3,7 @@ import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import { DISCOUNT_TIMER_OPTIONS } from '../constants/discountTimerOptions'
 
 const Add = ({ token }) => {
 
@@ -15,6 +16,7 @@ const Add = ({ token }) => {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [newPrice, setNewPrice] = useState("")
+  const [discountTimer, setDiscountTimer] = useState("")
   const [categories, setCategories] = useState([])
   const [subcategories, setSubcategories] = useState([])
   const [categoryId, setCategoryId] = useState("")
@@ -96,6 +98,7 @@ const Add = ({ token }) => {
       formData.append("description", description)
       formData.append("price", price)
       if (newPrice) formData.append("newPrice", newPrice)
+      if (discountTimer) formData.append("discountTimer", discountTimer)
       formData.append("categoryId", categoryId)
       if (subCategoryId) formData.append("subCategoryId", subCategoryId)
       formData.append("bestseller", bestseller)
@@ -119,6 +122,7 @@ const Add = ({ token }) => {
         setImage4(false)
         setPrice('')
         setNewPrice('')
+        setDiscountTimer('')
         setColors([])
       } else {
         toast.error(response.data.message)
@@ -193,7 +197,21 @@ const Add = ({ token }) => {
 
         <div>
           <p className='mb-2'>New Price (optional)</p>
-          <input onChange={(e) => setNewPrice(e.target.value)} value={newPrice} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder='Sale price' />
+          <input onChange={(e) => { setNewPrice(e.target.value); if (!e.target.value) setDiscountTimer(''); }} value={newPrice} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder='Sale price' />
+        </div>
+        <div>
+          <p className='mb-2'>Discount timer (optional)</p>
+          <select
+            onChange={(e) => setDiscountTimer(e.target.value)}
+            className='w-full px-3 py-2 sm:w-[140px] disabled:opacity-50 disabled:cursor-not-allowed'
+            value={discountTimer}
+            disabled={!newPrice}
+            title={!newPrice ? 'Set a new price first' : ''}
+          >
+            {DISCOUNT_TIMER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 

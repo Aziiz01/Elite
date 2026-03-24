@@ -47,7 +47,7 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
           onClick={(e) => e.stopPropagation()}
         >
           <h2 id="add-to-cart-modal-title" className='text-center py-6 text-base font-medium uppercase tracking-wide text-gray-900'>
-            Product added to your cart
+            Produit ajouté au panier
           </h2>
 
           <div className='px-6 pb-4'>
@@ -66,7 +66,7 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
               </div>
               <div className='flex-1 min-w-0 pt-1'>
                 <p className='font-medium text-gray-900'>{product?.name}</p>
-                <p className='text-sm text-gray-700 mt-1'>{currency}{displayPrice}</p>
+                <p className='text-sm text-gray-700 mt-1'>{displayPrice}{currency}</p>
               </div>
             </div>
           </div>
@@ -75,16 +75,16 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
 
           <div className='px-6 py-4 space-y-2'>
             <div className='flex justify-between text-sm'>
-              <span className='text-gray-600'>Subtotal</span>
-              <span>{currency}{subtotal.toFixed(2)}</span>
+              <span className='text-gray-600'>Sous-total</span>
+              <span>{subtotal.toFixed(2)}{currency}</span>
             </div>
             <div className='flex justify-between text-sm'>
-              <span className='text-gray-600'>Shipping</span>
-              <span>{currency}{shipping.toFixed(2)}</span>
+              <span className='text-gray-600'>Livraison</span>
+              <span>{shipping.toFixed(2)}{currency}</span>
             </div>
             <div className='flex justify-between font-medium pt-2'>
               <span>Total</span>
-              <span>{currency}{total.toFixed(2)}</span>
+              <span>{total.toFixed(2)}{currency}</span>
             </div>
           </div>
 
@@ -95,14 +95,14 @@ const AddToCartModal = ({ isOpen, onClose, product, quantity }) => {
               onClick={handleContinueShopping}
               className='flex-1 bg-gray-900 text-white py-3 text-sm font-medium uppercase hover:bg-gray-800 transition-colors'
             >
-              Continue shopping
+              Continuer mes achats
             </button>
             <button
               type='button'
               onClick={handleCheckout}
               className='flex-1 bg-gray-900 text-white py-3 text-sm font-medium uppercase hover:bg-gray-800 transition-colors'
             >
-              View cart
+              Voir le panier
             </button>
           </div>
         </div>

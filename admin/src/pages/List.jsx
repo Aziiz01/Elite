@@ -5,6 +5,24 @@ import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
 import { CATEGORIES } from '../constants/productOptions'
 
+const DiscountCountdown = ({ endsAt }) => {
+  const [now, setNow] = useState(Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const left = endsAt - now
+  if (left <= 0) return <span className="text-xs text-gray-400">Expired</span>
+  const h = Math.floor(left / 3600000)
+  const m = Math.floor((left % 3600000) / 60000)
+  const s = Math.floor((left % 60000) / 1000)
+  return (
+    <span className="text-xs font-medium text-orange-600">
+      {h}h {m}m {s}s left
+    </span>
+  )
+}
+
 const List = ({ token }) => {
   const [list, setList] = useState([])
   const [searchName, setSearchName] = useState('')
@@ -198,26 +216,31 @@ const List = ({ token }) => {
                 {item.name}
               </p>
               <p className="text-sm text-gray-500">{item.category} {item.subCategory ? `· ${item.subCategory}` : ''}</p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="font-medium text-gray-800">
-                  {item.newPrice != null && item.newPrice !== '' ? (
-                    <>
-                      <span className="text-gray-400 line-through">{currency}{item.price}</span>
-                      <span className="ml-1 text-green-600">{currency}{item.newPrice}</span>
-                    </>
-                  ) : (
-                    <span>{currency}{item.price}</span>
-                  )}
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    item.inStock !== false
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {item.inStock !== false ? 'In stock' : 'Out'}
-                </span>
+              <div className="flex flex-col gap-1 mt-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-800">
+                    {item.newPrice != null && item.newPrice !== '' ? (
+                      <>
+                        <span className="text-gray-400 line-through">{item.price}{currency}</span>
+                        <span className="ml-1 text-gray-900">{item.newPrice}{currency}</span>
+                      </>
+                    ) : (
+                      <span>{item.price}{currency}</span>
+                    )}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      item.inStock !== false
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {item.inStock !== false ? 'In stock' : 'Out'}
+                  </span>
+                </div>
+                {item.newPrice != null && item.newPrice !== '' && item.discountEndsAt && item.discountEndsAt > Date.now() && (
+                  <DiscountCountdown endsAt={item.discountEndsAt} />
+                )}
               </div>
               <div className="flex gap-2 mt-4">
                 <Link

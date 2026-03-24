@@ -20,15 +20,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (!error.response) {
-      toast.error('Connection error. Please check your network.');
+      toast.error('Erreur de connexion. Vérifiez votre connexion.');
       return Promise.reject(error);
     }
     const status = error.response?.status;
     const message = error.response?.data?.message;
     if (status >= 500) {
-      toast.error(message || 'Server error. Please try again later.');
+      toast.error(message || 'Erreur serveur. Veuillez réessayer plus tard.');
     } else if (status === 429) {
-      toast.error('Too many requests. Please wait a moment.');
+      toast.error('Trop de requêtes. Veuillez patienter.');
     }
     return Promise.reject(error);
   }
@@ -109,5 +109,12 @@ export const getFavoritesApi = (token) =>
 
 export const checkFavoriteApi = (productId, token) =>
   api.post('/api/favorite/check', { productId }, withAuth(token));
+
+// Newsletter API (public)
+export const subscribeNewsletter = (email) =>
+  api.post('/api/newsletter/subscribe', { email });
+
+// Hero slides API (public)
+export const getHeroSlides = () => api.get('/api/hero/list');
 
 export { BASE_URL as backendUrl };

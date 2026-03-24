@@ -10,7 +10,7 @@ import { sendPriceDropEmail } from "../services/mailService.js"
 const addProduct = async (req, res) => {
     try {
 
-        const { name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock } = req.body
+        const { name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer } = req.body
 
         // Validation
         if (!name || !description || !categoryId) {
@@ -62,6 +62,14 @@ const addProduct = async (req, res) => {
         const newPriceNum = newPrice !== undefined && newPrice !== '' ? Number(newPrice) : undefined
         const hasValidNewPrice = !isNaN(newPriceNum) && newPriceNum >= 0
 
+        let discountEndsAt = null
+        if (hasValidNewPrice && discountTimer) {
+            const hours = parseInt(discountTimer, 10)
+            if (!isNaN(hours) && hours > 0) {
+                discountEndsAt = Date.now() + hours * 60 * 60 * 1000
+            }
+        }
+
         const productData = {
             name: name.trim(),
             description: description.trim(),
@@ -69,6 +77,7 @@ const addProduct = async (req, res) => {
             subCategoryId: subCategoryId || undefined,
             price: priceNum,
             newPrice: hasValidNewPrice ? newPriceNum : undefined,
+            discountEndsAt,
             colors: colorsArray.map(c => String(c).trim()),
             inStock: inStock === "false" ? false : true,
             bestseller: bestseller === "true",
@@ -96,11 +105,21 @@ const listProducts = async (req, res) => {
             .populate("subCategoryId", "name")
             .lean()
 
+        const productIds = products.map(p => p._id)
+        const ratingAgg = await reviewModel.aggregate([
+            { $match: { productId: { $in: productIds } } },
+            { $group: { _id: "$productId", avgRating: { $avg: "$rating" }, count: { $sum: 1 } } }
+        ])
+        const ratingMap = Object.fromEntries(ratingAgg.map(r => [String(r._id), { avg: Math.round(r.avgRating * 10) / 10, count: r.count }]))
+
         const productsWithDisplayPrice = products.map(p => {
             const obj = { ...p }
+            const ratingData = ratingMap[String(p._id)]
             obj.displayPrice = p.newPrice ?? p.price
             obj.category = p.categoryId?.name ?? null
             obj.subCategory = p.subCategoryId?.name ?? null
+            obj.avgRating = ratingData?.avg ?? null
+            obj.reviewCount = ratingData?.count ?? 0
             return obj
         })
         res.json({ success: true, products: productsWithDisplayPrice })
@@ -160,7 +179,7 @@ const singleProduct = async (req, res) => {
 // function for update product
 const updateProduct = async (req, res) => {
     try {
-        const { id, name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock } = req.body
+        const { id, name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer } = req.body
 
         if (!id) {
             return res.json({ success: false, message: "Product ID is required" })
@@ -238,6 +257,14 @@ const updateProduct = async (req, res) => {
         product.subCategoryId = subCategoryId || undefined
         product.price = priceNum
         product.newPrice = hasValidNewPrice ? newPriceNum : undefined
+        if (discountTimer !== undefined && discountTimer !== null) {
+            if (hasValidNewPrice && discountTimer) {
+                const hours = parseInt(discountTimer, 10)
+                product.discountEndsAt = (!isNaN(hours) && hours > 0) ? Date.now() + hours * 60 * 60 * 1000 : null
+            } else {
+                product.discountEndsAt = null
+            }
+        }
         product.colors = colorsArray.map(c => String(c).trim())
         product.inStock = inStock === "false" ? false : true
         product.bestseller = bestseller === "true"

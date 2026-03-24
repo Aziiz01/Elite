@@ -48,7 +48,7 @@ const Profile = () => {
           setFavorites(favRes.data.favorites)
         }
       })
-      .catch(() => toast.error('Failed to load profile'))
+      .catch(() => toast.error('Échec du chargement du profil'))
       .finally(() => setLoading(false))
   }, [authToken, navigate])
 
@@ -77,14 +77,14 @@ const Profile = () => {
       if (editForm.newPassword.trim()) payload.newPassword = editForm.newPassword
       const res = await updateProfile(payload, authToken)
       if (res.data.success) {
-        toast.success('Profile updated')
+        toast.success('Profil mis à jour')
         setUser((prev) => prev ? { ...prev, address: editForm.address, telephone: editForm.telephone } : null)
         setEditForm((prev) => ({ ...prev, newPassword: '' }))
       } else {
-        toast.error(res.data.message || 'Update failed')
+        toast.error(res.data.message || 'Échec de la mise à jour')
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || err.message || 'Update failed')
+      toast.error(err?.response?.data?.message || err.message || 'Échec de la mise à jour')
     } finally {
       setSaving(false)
     }
@@ -96,20 +96,20 @@ const Profile = () => {
       if (res.data.success) {
         setFavorites((prev) => prev.filter((f) => String(f.productId) !== String(productId)))
         loadFavorites?.(authToken)
-        toast.success('Removed from favorites')
+        toast.success('Retiré des favoris')
       } else {
-        toast.error(res.data.message || 'Failed to remove')
+        toast.error(res.data.message || 'Échec de la suppression')
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to remove')
+      toast.error(err?.response?.data?.message || 'Échec de la suppression')
     }
   }
 
   if (loading) {
     return (
       <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
-        <Helmet><title>Loading | Elite</title></Helmet>
-        <p className='text-gray-500'>Loading...</p>
+        <Helmet><title>Chargement | Elite</title></Helmet>
+        <p className='text-gray-500'>Chargement...</p>
       </div>
     )
   }
@@ -119,38 +119,38 @@ const Profile = () => {
   return (
     <div className='border-t pt-14 pb-20'>
       <Helmet>
-        <title>My Account | Elite</title>
-        <meta name="description" content="Manage your Elite account. Edit profile, view orders, and manage favorites." />
+        <title>Mon compte | Elite</title>
+        <meta name="description" content="Gérez votre compte Elite. Modifiez votre profil, consultez vos commandes et favoris." />
       </Helmet>
       <div className='flex flex-col md:flex-row gap-8 md:gap-12'>
         {/* Sidebar */}
         <aside className='md:w-56 flex-shrink-0'>
           <div className='border-b md:border-b-0 md:border-r border-gray-200 pb-4 md:pb-0 md:pr-6'>
-            <p className='text-pink-600 text-sm font-medium mb-4'>Welcome back, {userName}</p>
+            <p className='text-pink-600 text-sm font-medium mb-4'>Bienvenue, {userName}</p>
             <nav className='flex flex-row md:flex-col gap-2 flex-wrap md:flex-nowrap'>
               <button
                 onClick={() => goTo(SECTIONS.editProfile)}
                 className={`text-left py-2 px-1 text-sm ${section === SECTIONS.editProfile ? 'text-pink-600 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                Edit Profile
+                Modifier le profil
               </button>
               <button
                 onClick={() => goTo(SECTIONS.orders)}
                 className={`text-left py-2 px-1 text-sm ${section === SECTIONS.orders ? 'text-pink-600 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                Orders
+                Commandes
               </button>
               <button
                 onClick={() => goTo(SECTIONS.favorites)}
                 className={`text-left py-2 px-1 text-sm ${section === SECTIONS.favorites ? 'text-pink-600 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                Favorites
+                Favoris
               </button>
               <button
                 onClick={logout}
                 className='text-left py-2 px-1 text-sm text-gray-500 hover:text-gray-700 md:mt-4'
               >
-                Logout
+                Déconnexion
               </button>
             </nav>
           </div>
@@ -160,23 +160,23 @@ const Profile = () => {
         <main className='flex-1 min-w-0'>
           {section === SECTIONS.orders && (
             <div>
-              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>My Orders</h1>
+              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Mes commandes</h1>
               <div className='overflow-x-auto'>
                 <table className='w-full text-sm'>
                   <thead>
                     <tr className='border-b border-gray-200 text-left text-gray-600'>
                       <th className='py-3 pr-4'>N°</th>
                       <th className='py-3 pr-4'>Date</th>
-                      <th className='py-3 pr-4'>Status</th>
+                      <th className='py-3 pr-4'>Statut</th>
                       <th className='py-3 pr-4'>Total</th>
-                      <th className='py-3'>Items</th>
+                      <th className='py-3'>Articles</th>
                     </tr>
                   </thead>
                   <tbody>
                     {orders.length === 0 ? (
                       <tr>
                         <td colSpan={5} className='py-8 text-gray-400 text-center'>
-                          No orders yet
+                          Aucune commande
                         </td>
                       </tr>
                     ) : (
@@ -185,8 +185,8 @@ const Profile = () => {
                           <td className='py-4 pr-4 font-mono text-gray-500'>#{String(order._id).slice(-6)}</td>
                           <td className='py-4 pr-4'>{new Date(order.date).toLocaleDateString()}</td>
                           <td className='py-4 pr-4'>{order.status}</td>
-                          <td className='py-4 pr-4 font-medium'>{currency}{order.amount}</td>
-                          <td className='py-4'>{order.items?.length || 0} item(s)</td>
+                          <td className='py-4 pr-4 font-medium'>{order.amount}{currency}</td>
+                          <td className='py-4'>{order.items?.length || 0} article(s)</td>
                         </tr>
                       ))
                     )}
@@ -198,9 +198,9 @@ const Profile = () => {
 
           {section === SECTIONS.favorites && (
             <div>
-              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Favorites</h1>
+              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Favoris</h1>
               {favorites.length === 0 ? (
-                <p className='text-gray-500 py-8'>No favorites yet. Add products from the collection!</p>
+                <p className='text-gray-500 py-8'>Aucun favori. Ajoutez des produits depuis la collection !</p>
               ) : (
                 <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
                   {favorites.map((item) => (
@@ -217,9 +217,9 @@ const Profile = () => {
                           <p className='text-sm line-clamp-2 text-gray-800'>{item.name}</p>
                           <p className='text-sm font-medium mt-1'>
                             {item.newPrice != null && item.newPrice !== '' ? (
-                              <span><span className='line-through text-gray-500'>{currency}{item.price}</span> <span className='text-green-600'>{currency}{item.newPrice}</span></span>
+                              <span><span className='line-through text-gray-500'>{item.price}{currency}</span> <span className='text-gray-900'>{item.newPrice}{currency}</span></span>
                             ) : (
-                              <span>{currency}{item.price}</span>
+                              <span>{item.price}{currency}</span>
                             )}
                           </p>
                         </div>
@@ -228,7 +228,7 @@ const Profile = () => {
                         type='button'
                         onClick={() => handleRemoveFavorite(item.productId)}
                         className='absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-gray-600 hover:text-pink-500 hover:bg-white shadow-sm'
-                        aria-label='Remove from favorites'
+                        aria-label='Retirer des favoris'
                       >
                         <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'><path d='M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z' /></svg>
                       </button>
@@ -241,16 +241,16 @@ const Profile = () => {
 
           {section === SECTIONS.editProfile && (
             <div>
-              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Edit Profile</h1>
+              <h1 className='text-xl font-semibold mb-6 border-b border-gray-200 pb-3'>Modifier le profil</h1>
               <div className='mb-6 text-sm text-gray-600'>
-                <p className='font-medium text-gray-800 mb-1'>Account info (read-only)</p>
+                <p className='font-medium text-gray-800 mb-1'>Informations du compte (lecture seule)</p>
                 <p>{user?.firstName} {user?.lastName}</p>
                 <p>{user?.email}</p>
                 <p>{user?.city}, {user?.postalCode}</p>
               </div>
               <form onSubmit={handleSave} className='flex flex-col gap-4 max-w-md'>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>Address</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Adresse</label>
                   <input
                     name='address'
                     value={editForm.address}
@@ -260,7 +260,7 @@ const Profile = () => {
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>Phone number</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Téléphone</label>
                   <input
                     name='telephone'
                     type='tel'
@@ -272,14 +272,14 @@ const Profile = () => {
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>New password (leave blank to keep)</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Nouveau mot de passe (laisser vide pour conserver)</label>
                   <input
                     name='newPassword'
                     type='password'
                     value={editForm.newPassword}
                     onChange={onChange}
                     minLength={8}
-                    placeholder='Min 8 characters'
+                    placeholder='Min. 8 caractères'
                     className='w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:border-transparent'
                   />
                 </div>
@@ -288,7 +288,7 @@ const Profile = () => {
                   disabled={saving}
                   className='bg-black text-white px-6 py-2.5 text-sm font-medium w-fit rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-60'
                 >
-                  {saving ? 'Saving...' : 'Save changes'}
+                  {saving ? 'Enregistrement...' : 'Enregistrer'}
                 </button>
               </form>
             </div>

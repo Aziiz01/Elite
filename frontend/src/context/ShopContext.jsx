@@ -28,7 +28,7 @@ const loadGuestCart = () => {
 
 const ShopContextProvider = (props) => {
 
-    const currency = 'Dt ';
+    const currency = ' Dt';
     const delivery_fee = 10;
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
@@ -43,7 +43,7 @@ const ShopContextProvider = (props) => {
     const addToCart = async (itemId, color, quantity = 1) => {
 
         if (!color) {
-            toast.error('Select a color');
+            toast.error('Choisissez une couleur');
             return;
         }
 
@@ -203,7 +203,7 @@ const ShopContextProvider = (props) => {
     const toggleFavorite = async (productId) => {
         const authToken = token || localStorage.getItem('token')
         if (!authToken) {
-            toast.info('Login to add favorites')
+            toast.info('Connectez-vous pour ajouter aux favoris')
             navigate(`/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`)
             return
         }
@@ -215,14 +215,14 @@ const ShopContextProvider = (props) => {
         try {
             if (isFav) {
                 await removeFavoriteApi(productId, authToken)
-                toast.success('Removed from favorites')
+                toast.success('Retiré des favoris')
             } else {
                 await addFavoriteApi(productId, authToken)
-                toast.success('Added to favorites')
+                toast.success('Ajouté aux favoris')
             }
         } catch (err) {
             setFavoriteIds((prev) => (isFav ? [...prev, id] : prev.filter((f) => f !== id)))
-            toast.error(err?.response?.data?.message || 'Failed to update favorites')
+            toast.error(err?.response?.data?.message || 'Échec de la mise à jour des favoris')
         }
     }
 

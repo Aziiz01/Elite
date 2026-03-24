@@ -72,17 +72,17 @@ const Product = () => {
     return (
       <div className='border-t pt-14 min-h-[50vh] flex flex-col items-center justify-center py-16 px-6 text-center'>
         <Helmet>
-          <title>Product Not Found | Elite</title>
+          <title>Produit introuvable | Elite</title>
         </Helmet>
-        <p className='text-gray-600 text-lg mb-2'>Product not found</p>
+        <p className='text-gray-600 text-lg mb-2'>Produit introuvable</p>
         <p className='text-gray-500 text-sm mb-6'>
-          The product you're looking for doesn't exist or may have been removed.
+          Ce produit n'existe pas ou a été retiré du catalogue.
         </p>
         <Link
           to='/collection'
           className='inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors'
         >
-          Browse collection
+          Découvrir la collection
         </Link>
       </div>
     )
@@ -92,7 +92,7 @@ const Product = () => {
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
       <Helmet>
         <title>{productData.name} | Elite</title>
-        <meta name="description" content={productData.description?.slice(0, 160) || `Shop ${productData.name} at Elite. Women's fashion and makeup.`} />
+        <meta name="description" content={productData.description?.slice(0, 160) || `Achetez ${productData.name} chez Elite. Mode femme et maquillage.`} />
       </Helmet>
       {/*----------- Product Data-------------- */}
       <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
@@ -120,7 +120,7 @@ const Product = () => {
             <button
               type='button'
               onClick={() => toggleFavorite(productData._id)}
-              aria-label={favoriteIds.includes(String(productData._id)) ? 'Remove from favorites' : 'Add to favorites'}
+              aria-label={favoriteIds.includes(String(productData._id)) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
               className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full border transition-colors ${favoriteIds.includes(String(productData._id)) ? 'bg-pink-50 text-pink-500 border-pink-200' : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-pink-200 hover:text-pink-500'}`}
             >
               {favoriteIds.includes(String(productData._id)) ? (
@@ -133,27 +133,27 @@ const Product = () => {
           <div className='flex items-center gap-2 mt-2'>
               <StarRating rating={avgRating || 0} size='sm' />
               {reviews.length > 0 && (
-                <p className='text-gray-500 text-sm'>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</p>
+                <p className='text-gray-500 text-sm'>({reviews.length} avis)</p>
               )}
           </div>
           <div className='mt-5 flex items-center gap-3 flex-wrap'>
             <span className='text-3xl font-medium'>
               {productData.newPrice != null && productData.newPrice !== '' ? (
                 <>
-                  <span className='line-through text-gray-500 text-2xl'>{currency}{productData.price}</span>
-                  <span className='ml-2 text-green-600'>{currency}{productData.newPrice}</span>
+                  <span className='line-through text-gray-500 text-2xl'>{productData.price}{currency}</span>
+                  <span className='ml-2 text-gray-900'>{productData.newPrice}{currency}</span>
                 </>
               ) : (
-                <span>{currency}{productData.price}</span>
+                <span>{productData.price}{currency}</span>
               )}
             </span>
             {productData.inStock === false && (
-              <span className='text-red-600 font-medium'>Out of stock</span>
+              <span className='text-red-600 font-medium'>Rupture de stock</span>
             )}
           </div>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
-              <p className='text-gray-700 font-medium'>Select Color</p>
+              <p className='text-gray-700 font-medium'>Choisir la couleur</p>
               <div className='flex flex-wrap gap-3 items-center'>
                 {(productData.colors || []).map((hex, index) => {
                   const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hex);
@@ -173,12 +173,12 @@ const Product = () => {
                   );
                 })}
                 {(productData.colors || []).length === 0 && (
-                  <p className='text-gray-500 text-sm'>No colors available</p>
+                  <p className='text-gray-500 text-sm'>Aucune couleur disponible</p>
                 )}
               </div>
           </div>
           <div className='flex flex-col gap-4 mb-6'>
-              <p className='text-gray-700 font-medium'>Quantity</p>
+              <p className='text-gray-700 font-medium'>Quantité</p>
               <div className='flex items-center gap-2'>
                 <button type='button' onClick={() => setQuantity((q) => Math.max(1, q - 1))} className='w-10 h-10 border border-gray-300 rounded flex items-center justify-center text-lg hover:bg-gray-100 focus:ring-2 focus:ring-gray-400'>−</button>
                 <input type='number' min={1} value={quantity} onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} className='w-16 text-center border border-gray-300 rounded py-2 focus:ring-2 focus:ring-gray-400 focus:border-transparent' />
@@ -194,7 +194,7 @@ const Product = () => {
             disabled={!selectedColor || productData.inStock === false}
             className='bg-black text-white px-8 py-3 text-sm rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 active:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed'
           >
-            {productData.inStock === false ? 'OUT OF STOCK' : 'ADD TO CART'}
+            {productData.inStock === false ? 'RUPTURE DE STOCK' : 'AJOUTER AU PANIER'}
           </button>
           <AddToCartModal
             isOpen={showAddToCartModal}
@@ -204,9 +204,9 @@ const Product = () => {
           />
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% Original product.</p>
-              <p>Cash on delivery is available on this product.</p>
-              <p>Easy return and exchange policy within 7 days.</p>
+              <p>Produit 100 % authentique.</p>
+              <p>Paiement à la livraison disponible.</p>
+              <p>Retours et échanges faciles sous 7 jours.</p>
           </div>
         </div>
       </div>
@@ -226,14 +226,14 @@ const Product = () => {
             onClick={() => setActiveTab('reviews')}
             className={`border px-5 py-3 text-sm ${activeTab === 'reviews' ? 'bg-gray-100 font-medium' : ''}`}
           >
-            Reviews {reviews.length > 0 && `(${reviews.length})`}
+            Avis {reviews.length > 0 && `(${reviews.length})`}
           </button>
         </div>
         <div className='border px-6 py-6 text-sm'>
           {activeTab === 'description' && (
             <div className='flex flex-col gap-4 text-gray-500'>
               <p>{productData.description}</p>
-              <p>100% Original product. Cash on delivery is available. Easy return and exchange policy within 7 days.</p>
+              <p>Produit 100 % authentique. Paiement à la livraison disponible. Retours et échanges faciles sous 7 jours.</p>
             </div>
           )}
           {activeTab === 'reviews' && (
@@ -256,8 +256,8 @@ const Product = () => {
     </div>
   ) : (
     <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
-      <Helmet><title>Loading | Elite</title></Helmet>
-      <p className='text-gray-500'>Loading product…</p>
+      <Helmet><title>Chargement | Elite</title></Helmet>
+      <p className='text-gray-500'>Chargement du produit…</p>
     </div>
   )
 }

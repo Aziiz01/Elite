@@ -56,7 +56,7 @@ const Orders = () => {
                         <div>
                           <p className='sm:text-base font-medium'>{item.name}</p>
                           <div className='flex items-center gap-3 mt-1 text-base text-gray-700 flex-wrap'>
-                            <p>{currency}{(item.newPrice != null && item.newPrice !== '') ? item.newPrice : item.price}</p>
+                            <p>{(item.newPrice != null && item.newPrice !== '') ? item.newPrice : item.price}{currency}</p>
                             <p>Quantity: {item.quantity}</p>
                             {item.color && (
                               <span className='inline-flex items-center gap-1'>

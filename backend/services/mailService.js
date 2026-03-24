@@ -6,6 +6,7 @@ import {
     getOrderDeliveredEmailTemplate
 } from "../utils/emailTemplates/orderStatusUpdate.js";
 import { getPriceDropEmailTemplate } from "../utils/emailTemplates/priceDropNotification.js";
+import { getNewsletterWelcomeTemplate } from "../utils/emailTemplates/newsletterWelcome.js";
 
 /**
  * Sends order confirmation email to the customer (full order details)
@@ -143,6 +144,92 @@ export const sendPriceDropEmail = async ({ to, customerName, productName, produc
         return { success: true };
     } catch (error) {
         console.error("Mail: Failed to send price drop email:", error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Sends newsletter welcome email after subscription
+ */
+export const sendNewsletterWelcomeEmail = async ({ to }) => {
+    if (!to || !String(to).trim()) {
+        return { success: false, error: "Recipient email is required" };
+    }
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn("Mail: SMTP not configured. Skipping newsletter welcome email.");
+        return { success: false, error: "SMTP not configured" };
+    }
+
+    try {
+        const html = getNewsletterWelcomeTemplate({ email: to.trim() });
+
+        await transporter.sendMail({
+            from: process.env.MAIL_FROM || `"Elite" <${process.env.SMTP_USER}>`,
+            to: to.trim(),
+            subject: "Welcome to Elite – You're in!",
+            html
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Mail: Failed to send newsletter welcome:", error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Sends a personalized email to a subscriber (admin bulk/custom emails)
+ * body: HTML string for the email content
+ */
+export const sendNewsletterCustomEmail = async ({ to, subject, body }) => {
+    if (!to || !String(to).trim()) {
+        return { success: false, error: "Recipient email is required" };
+    }
+    if (!subject || !String(subject).trim()) {
+        return { success: false, error: "Subject is required" };
+    }
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn("Mail: SMTP not configured. Skipping newsletter email.");
+        return { success: false, error: "SMTP not configured" };
+    }
+
+    const wrappedHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f5f5f5;">
+<table width="100%" cellspacing="0" cellpadding="0" style="background: #f5f5f5; padding: 24px 0;">
+<tr><td align="center">
+<table width="600" cellspacing="0" cellpadding="0" style="max-width: 600px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+<tr>
+    <td style="background: #1a1a1a; color: #ffffff; padding: 24px 32px; text-align: center;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: 2px;">ELITE</h1>
+    </td>
+</tr>
+<tr><td style="padding: 32px; font-size: 15px; color: #444; line-height: 1.6;">
+${body || "<p>No content.</p>"}
+</td></tr>
+<tr>
+    <td style="background: #f5f5f5; padding: 20px 32px; text-align: center; font-size: 12px; color: #888;">
+        <p style="margin: 0;">&copy; ${new Date().getFullYear()} Elite. All rights reserved.</p>
+    </td>
+</tr>
+</table></td></tr></table>
+</body></html>`;
+
+    try {
+        await transporter.sendMail({
+            from: process.env.MAIL_FROM || `"Elite" <${process.env.SMTP_USER}>`,
+            to: to.trim(),
+            subject: subject.trim(),
+            html: wrappedHtml
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Mail: Failed to send newsletter email:", error.message);
         return { success: false, error: error.message };
     }
 };

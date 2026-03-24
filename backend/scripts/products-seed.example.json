@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Lip Gloss Rose",
+    "description": "Shiny lip gloss with a natural rose tint. Long-lasting and moisturizing.",
+    "price": 15,
+    "newPrice": 12,
+    "category": "Lèvres",
+    "subCategory": "Gloss",
+    "colors": ["#E91E63", "#F48FB1"],
+    "inStock": true,
+    "bestseller": true,
+    "discountTimer": 168,
+    "images": [
+      "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400",
+      "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=400"
+    ]
+  },
+  {
+    "name": "Matte Foundation",
+    "description": "Full coverage matte foundation for all skin types.",
+    "price": 28,
+    "category": "Teint",
+    "subCategory": "Poudres",
+    "colors": ["#F5DEB3", "#D2691E", "#8B4513"],
+    "inStock": true,
+    "bestseller": false,
+    "images": [
+      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400"
+    ]
+  }
+]

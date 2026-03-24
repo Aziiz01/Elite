@@ -4,6 +4,7 @@ import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import { DISCOUNT_TIMER_OPTIONS, DISCOUNT_TIMER_KEEP } from '../constants/discountTimerOptions'
 
 const Edit = ({ token }) => {
   const { id } = useParams()
@@ -19,6 +20,7 @@ const Edit = ({ token }) => {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [newPrice, setNewPrice] = useState("")
+  const [discountTimer, setDiscountTimer] = useState("")
   const [categories, setCategories] = useState([])
   const [subcategories, setSubcategories] = useState([])
   const [categoryId, setCategoryId] = useState("")
@@ -91,6 +93,8 @@ const Edit = ({ token }) => {
           setDescription(p.description || "")
           setPrice(p.price?.toString() || "")
           setNewPrice(p.newPrice != null && p.newPrice !== '' ? p.newPrice.toString() : "")
+          const endsAt = p.discountEndsAt
+          setDiscountTimer(endsAt && endsAt > Date.now() ? DISCOUNT_TIMER_KEEP : "")
           setCategoryId(p.categoryId?._id || p.categoryId || "")
           setSubCategoryId(p.subCategoryId?._id || p.subCategoryId || "")
           setBestseller(p.bestseller || false)
@@ -136,6 +140,7 @@ const Edit = ({ token }) => {
       formData.append("description", description)
       formData.append("price", price)
       if (newPrice) formData.append("newPrice", newPrice)
+      if (discountTimer !== DISCOUNT_TIMER_KEEP) formData.append("discountTimer", discountTimer)
       formData.append("categoryId", categoryId)
       if (subCategoryId) formData.append("subCategoryId", subCategoryId)
       formData.append("bestseller", bestseller)
@@ -223,7 +228,24 @@ const Edit = ({ token }) => {
         </div>
         <div>
           <p className='mb-2'>New Price (optional)</p>
-          <input onChange={(e) => setNewPrice(e.target.value)} value={newPrice} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder='Sale price' />
+          <input onChange={(e) => { setNewPrice(e.target.value); if (!e.target.value) setDiscountTimer(''); }} value={newPrice} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder='Sale price' />
+        </div>
+        <div>
+          <p className='mb-2'>Discount timer (optional)</p>
+          <select
+            onChange={(e) => setDiscountTimer(e.target.value)}
+            className='w-full px-3 py-2 sm:w-[140px] disabled:opacity-50 disabled:cursor-not-allowed'
+            value={discountTimer}
+            disabled={!newPrice}
+            title={!newPrice ? 'Set a new price first' : ''}
+          >
+            {discountTimer === DISCOUNT_TIMER_KEEP && (
+              <option value={DISCOUNT_TIMER_KEEP}>Keep current</option>
+            )}
+            {DISCOUNT_TIMER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 

@@ -41,24 +41,24 @@ const Cart = () => {
   return (
     <div className='border-t pt-14'>
       <Helmet>
-        <title>Your Cart | Elite</title>
-        <meta name="description" content="Review your cart and proceed to checkout. Cash on delivery available across Tunisia." />
+        <title>Votre panier | Elite</title>
+        <meta name="description" content="Consultez votre panier et passez commande. Paiement à la livraison disponible en Tunisie." />
       </Helmet>
 
       <div className=' text-2xl mb-3'>
-        <Title text1={'YOUR'} text2={'CART'} />
+        <Title text1={'VOTRE'} text2={'PANIER'} />
       </div>
 
       <div>
         {cartData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-            <p className="text-gray-600 text-lg mb-2">Your cart is empty</p>
-            <p className="text-gray-500 text-sm mb-6">Add some items to get started.</p>
+            <p className="text-gray-600 text-lg mb-2">Votre panier est vide</p>
+            <p className="text-gray-500 text-sm mb-6">Ajoutez des articles pour commencer.</p>
             <Link
               to="/collection"
               className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
             >
-              Browse collection
+              Découvrir la collection
             </Link>
           </div>
         ) : (
@@ -73,12 +73,12 @@ const Cart = () => {
                   <div className='flex items-start gap-6'>
                     <div className='w-16 sm:w-20 h-16 sm:h-20 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs'>—</div>
                     <div>
-                      <p className='text-xs sm:text-lg font-medium text-gray-500'>Product no longer available</p>
-                      <p className='text-xs text-gray-400 mt-1'>Item may have been removed from the store</p>
+                      <p className='text-xs sm:text-lg font-medium text-gray-500'>Produit indisponible</p>
+                      <p className='text-xs text-gray-400 mt-1'>L'article a peut-être été retiré du catalogue</p>
                     </div>
                   </div>
                   <span className='text-sm text-gray-400'>—</span>
-                  <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Remove" title="Remove from cart" />
+                  <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Supprimer" title="Retirer du panier" />
                 </div>
               );
             }
@@ -93,17 +93,17 @@ const Cart = () => {
                     <p className='text-xs sm:text-lg font-medium flex items-center gap-2 flex-wrap'>
                       {productData.name}
                       {isOutOfStock && (
-                        <span className='text-red-600 text-xs font-medium'>Out of stock</span>
+                        <span className='text-red-600 text-xs font-medium'>Rupture de stock</span>
                       )}
                     </p>
                     <div className='flex items-center gap-5 mt-2'>
                       {productData.newPrice != null && productData.newPrice !== '' ? (
                         <span>
-                          <span className='line-through text-gray-500'>{currency}{productData.price}</span>
-                          <span className='ml-1 font-medium text-green-600'>{currency}{productData.newPrice}</span>
+                          <span className='line-through text-gray-500'>{productData.price}{currency}</span>
+                          <span className='ml-1 font-medium text-gray-900'>{productData.newPrice}{currency}</span>
                         </span>
                       ) : (
-                        <p>{currency}{productData.price}</p>
+                        <p>{productData.price}{currency}</p>
                       )}
                       <span
                         className='w-6 h-6 rounded-full border border-gray-300 flex-shrink-0 inline-block'
@@ -127,7 +127,7 @@ const Cart = () => {
                   type="number"
                   min={1}
                 />
-                <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Remove" title="Remove from cart" />
+                <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Supprimer" title="Retirer du panier" />
               </div>
             )
           })
@@ -149,7 +149,7 @@ const Cart = () => {
               disabled={validCartCount === 0}
               className='bg-black text-white text-sm my-8 px-8 py-3 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed'
             >
-              PROCEED TO CHECKOUT
+              PASSER COMMANDE
             </button>
           </div>
           <CheckoutAuthModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} />

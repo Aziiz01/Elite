@@ -40,8 +40,8 @@ const CheckoutAuthModal = ({ isOpen, onClose }) => {
           className='bg-white w-full max-w-md pointer-events-auto p-6'
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 id="checkout-auth-modal-title" className='text-xl font-medium text-gray-900 mb-2'>Proceed to Checkout</h2>
-          <p className='text-gray-600 text-sm mb-6'>Choose how you would like to continue:</p>
+          <h2 id="checkout-auth-modal-title" className='text-xl font-medium text-gray-900 mb-2'>Passer commande</h2>
+          <p className='text-gray-600 text-sm mb-6'>Choisissez comment continuer :</p>
           <div className='flex flex-col gap-3'>
             <button
               ref={firstButtonRef}
@@ -49,14 +49,14 @@ const CheckoutAuthModal = ({ isOpen, onClose }) => {
               onClick={handleLoginRegister}
               className='w-full bg-black text-white py-3 text-sm font-medium hover:bg-gray-800 transition-colors'
             >
-              Login / Register
+              Connexion / Inscription
             </button>
             <button
               type='button'
               onClick={handleContinueAsGuest}
               className='w-full border border-gray-800 text-gray-900 py-3 text-sm font-medium hover:bg-gray-50 transition-colors'
             >
-              Continue as Guest
+              Continuer en tant qu'invité
             </button>
           </div>
           <button
@@ -64,7 +64,7 @@ const CheckoutAuthModal = ({ isOpen, onClose }) => {
             onClick={onClose}
             className='mt-4 w-full text-gray-500 text-sm hover:text-gray-700'
           >
-            Cancel
+            Annuler
           </button>
         </div>
       </div>
