@@ -6,6 +6,21 @@ import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
 import { DISCOUNT_TIMER_OPTIONS, DISCOUNT_TIMER_KEEP } from '../constants/discountTimerOptions'
 
+const defaultProductAttributes = {
+  releaseDate: '',
+  brand: '',
+  range: '',
+  productType: '',
+  classification: '',
+  content: '',
+  country: '',
+  collection: '',
+  manufacturer: '',
+  precautions: '',
+  usageTips: '',
+  ingredients: '',
+}
+
 const Edit = ({ token }) => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -29,6 +44,7 @@ const Edit = ({ token }) => {
   const [inStock, setInStock] = useState(true)
   const [colors, setColors] = useState([])
   const [colorPickerValue, setColorPickerValue] = useState("#000000")
+  const [productAttributes, setProductAttributes] = useState(defaultProductAttributes)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -83,6 +99,10 @@ const Edit = ({ token }) => {
     setColors(colors.filter(c => c !== color))
   }
 
+  const handleAttributeChange = (key, value) => {
+    setProductAttributes((prev) => ({ ...prev, [key]: value }))
+  }
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -101,6 +121,7 @@ const Edit = ({ token }) => {
           setInStock(p.inStock !== false)
           const loadedColors = Array.isArray(p.colors) ? p.colors : []
           setColors(loadedColors.filter(c => typeof c === 'string'))
+          setProductAttributes({ ...defaultProductAttributes, ...(p.productAttributes || {}) })
           if (p.image?.length) {
             setImage1(p.image[0] || null)
             setImage2(p.image[1] || null)
@@ -146,6 +167,7 @@ const Edit = ({ token }) => {
       formData.append("bestseller", bestseller)
       formData.append("inStock", inStock)
       formData.append("colors", JSON.stringify(colors))
+      formData.append("productAttributes", JSON.stringify(productAttributes))
 
       if (image1 instanceof File) formData.append("image1", image1)
       if (image2 instanceof File) formData.append("image2", image2)
@@ -201,6 +223,24 @@ const Edit = ({ token }) => {
       <div className='w-full'>
         <p className='mb-2'>Product description</p>
         <textarea onChange={(e) => setDescription(e.target.value)} value={description} className='w-full max-w-[500px] px-3 py-2' placeholder='Write content here' required />
+      </div>
+
+      <div className='w-full max-w-[900px]'>
+        <p className='mb-2'>Product characteristics (for Product Experience)</p>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+          <input value={productAttributes.releaseDate} onChange={(e) => handleAttributeChange('releaseDate', e.target.value)} className='px-3 py-2' type='text' placeholder='Release date (e.g. 2024)' />
+          <input value={productAttributes.brand} onChange={(e) => handleAttributeChange('brand', e.target.value)} className='px-3 py-2' type='text' placeholder='Brand' />
+          <input value={productAttributes.range} onChange={(e) => handleAttributeChange('range', e.target.value)} className='px-3 py-2' type='text' placeholder='Range / Line' />
+          <input value={productAttributes.productType} onChange={(e) => handleAttributeChange('productType', e.target.value)} className='px-3 py-2' type='text' placeholder='Product type' />
+          <input value={productAttributes.classification} onChange={(e) => handleAttributeChange('classification', e.target.value)} className='px-3 py-2' type='text' placeholder='Classification' />
+          <input value={productAttributes.content} onChange={(e) => handleAttributeChange('content', e.target.value)} className='px-3 py-2' type='text' placeholder='Content / Size' />
+          <input value={productAttributes.country} onChange={(e) => handleAttributeChange('country', e.target.value)} className='px-3 py-2' type='text' placeholder='Country' />
+          <input value={productAttributes.collection} onChange={(e) => handleAttributeChange('collection', e.target.value)} className='px-3 py-2' type='text' placeholder='Collection' />
+          <input value={productAttributes.manufacturer} onChange={(e) => handleAttributeChange('manufacturer', e.target.value)} className='px-3 py-2 sm:col-span-2' type='text' placeholder='Manufacturer' />
+          <textarea value={productAttributes.precautions} onChange={(e) => handleAttributeChange('precautions', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Precautions' />
+          <textarea value={productAttributes.usageTips} onChange={(e) => handleAttributeChange('usageTips', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Usage tips' />
+          <textarea value={productAttributes.ingredients} onChange={(e) => handleAttributeChange('ingredients', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Ingredients' />
+        </div>
       </div>
 
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>

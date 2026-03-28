@@ -5,6 +5,21 @@ import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
 import { DISCOUNT_TIMER_OPTIONS } from '../constants/discountTimerOptions'
 
+const defaultProductAttributes = {
+  releaseDate: '',
+  brand: '',
+  range: '',
+  productType: '',
+  classification: '',
+  content: '',
+  country: '',
+  collection: '',
+  manufacturer: '',
+  precautions: '',
+  usageTips: '',
+  ingredients: '',
+}
+
 const Add = ({ token }) => {
 
   const [image1, setImage1] = useState(false)
@@ -25,6 +40,7 @@ const Add = ({ token }) => {
   const [inStock, setInStock] = useState(true)
   const [colors, setColors] = useState([])
   const [colorPickerValue, setColorPickerValue] = useState("#000000")
+  const [productAttributes, setProductAttributes] = useState(defaultProductAttributes)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -79,6 +95,10 @@ const Add = ({ token }) => {
     setColors(colors.filter(c => c !== color))
   }
 
+  const handleAttributeChange = (key, value) => {
+    setProductAttributes((prev) => ({ ...prev, [key]: value }))
+  }
+
   const onSubmitHandler = async (e) => {
     e.preventDefault()
 
@@ -104,6 +124,7 @@ const Add = ({ token }) => {
       formData.append("bestseller", bestseller)
       formData.append("inStock", inStock)
       formData.append("colors", JSON.stringify(colors))
+      formData.append("productAttributes", JSON.stringify(productAttributes))
 
       image1 && formData.append("image1", image1)
       image2 && formData.append("image2", image2)
@@ -124,6 +145,7 @@ const Add = ({ token }) => {
         setNewPrice('')
         setDiscountTimer('')
         setColors([])
+        setProductAttributes(defaultProductAttributes)
       } else {
         toast.error(response.data.message)
       }
@@ -167,6 +189,24 @@ const Add = ({ token }) => {
       <div className='w-full'>
         <p className='mb-2'>Product description</p>
         <textarea onChange={(e) => setDescription(e.target.value)} value={description} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' required />
+      </div>
+
+      <div className='w-full max-w-[900px]'>
+        <p className='mb-2'>Product characteristics (for Product Experience)</p>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+          <input value={productAttributes.releaseDate} onChange={(e) => handleAttributeChange('releaseDate', e.target.value)} className='px-3 py-2' type='text' placeholder='Release date (e.g. 2024)' />
+          <input value={productAttributes.brand} onChange={(e) => handleAttributeChange('brand', e.target.value)} className='px-3 py-2' type='text' placeholder='Brand' />
+          <input value={productAttributes.range} onChange={(e) => handleAttributeChange('range', e.target.value)} className='px-3 py-2' type='text' placeholder='Range / Line' />
+          <input value={productAttributes.productType} onChange={(e) => handleAttributeChange('productType', e.target.value)} className='px-3 py-2' type='text' placeholder='Product type' />
+          <input value={productAttributes.classification} onChange={(e) => handleAttributeChange('classification', e.target.value)} className='px-3 py-2' type='text' placeholder='Classification' />
+          <input value={productAttributes.content} onChange={(e) => handleAttributeChange('content', e.target.value)} className='px-3 py-2' type='text' placeholder='Content / Size' />
+          <input value={productAttributes.country} onChange={(e) => handleAttributeChange('country', e.target.value)} className='px-3 py-2' type='text' placeholder='Country' />
+          <input value={productAttributes.collection} onChange={(e) => handleAttributeChange('collection', e.target.value)} className='px-3 py-2' type='text' placeholder='Collection' />
+          <input value={productAttributes.manufacturer} onChange={(e) => handleAttributeChange('manufacturer', e.target.value)} className='px-3 py-2 sm:col-span-2' type='text' placeholder='Manufacturer' />
+          <textarea value={productAttributes.precautions} onChange={(e) => handleAttributeChange('precautions', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Precautions' />
+          <textarea value={productAttributes.usageTips} onChange={(e) => handleAttributeChange('usageTips', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Usage tips' />
+          <textarea value={productAttributes.ingredients} onChange={(e) => handleAttributeChange('ingredients', e.target.value)} className='px-3 py-2 sm:col-span-2' rows={2} placeholder='Ingredients' />
+        </div>
       </div>
 
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
