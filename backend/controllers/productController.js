@@ -6,11 +6,43 @@ import categoryModel from "../models/categoryModel.js"
 import favoriteModel from "../models/favoriteModel.js"
 import { sendPriceDropEmail } from "../services/mailService.js"
 
+const defaultProductAttributes = {
+    releaseDate: "",
+    brand: "",
+    range: "",
+    productType: "",
+    classification: "",
+    content: "",
+    country: "",
+    collection: "",
+    manufacturer: "",
+    precautions: "",
+    usageTips: "",
+    ingredients: "",
+}
+
+const normalizeProductAttributes = (input) => {
+    let parsed = input
+    if (typeof input === "string") {
+        try {
+            parsed = JSON.parse(input)
+        } catch {
+            parsed = {}
+        }
+    }
+    const source = parsed && typeof parsed === "object" ? parsed : {}
+    const normalized = { ...defaultProductAttributes }
+    for (const key of Object.keys(defaultProductAttributes)) {
+        normalized[key] = source[key] != null ? String(source[key]).trim() : ""
+    }
+    return normalized
+}
+
 // function for add product
 const addProduct = async (req, res) => {
     try {
 
-        const { name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer } = req.body
+        const { name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer, productAttributes } = req.body
 
         // Validation
         if (!name || !description || !categoryId) {
@@ -79,6 +111,7 @@ const addProduct = async (req, res) => {
             newPrice: hasValidNewPrice ? newPriceNum : undefined,
             discountEndsAt,
             colors: colorsArray.map(c => String(c).trim()),
+            productAttributes: normalizeProductAttributes(productAttributes),
             inStock: inStock === "false" ? false : true,
             bestseller: bestseller === "true",
             image: imagesUrl,
@@ -179,7 +212,7 @@ const singleProduct = async (req, res) => {
 // function for update product
 const updateProduct = async (req, res) => {
     try {
-        const { id, name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer } = req.body
+        const { id, name, description, price, newPrice, categoryId, subCategoryId, colors, bestseller, inStock, discountTimer, productAttributes } = req.body
 
         if (!id) {
             return res.json({ success: false, message: "Product ID is required" })
@@ -266,6 +299,7 @@ const updateProduct = async (req, res) => {
             }
         }
         product.colors = colorsArray.map(c => String(c).trim())
+        product.productAttributes = normalizeProductAttributes(productAttributes || product.productAttributes)
         product.inStock = inStock === "false" ? false : true
         product.bestseller = bestseller === "true"
         product.image = imagesUrl.filter(Boolean)

@@ -1,5 +1,5 @@
 /**
- * Migration script: Product schema (sizes → colors, add newPrice, inStock)
+ * Migration script: Product schema
  *
  * Run with: node scripts/migrate-product-schema.js
  *
@@ -10,6 +10,7 @@
  * What it does:
  * - Adds colors (copied from sizes, or ["Default"] if sizes missing)
  * - Adds inStock: true
+ * - Adds productAttributes object
  * - Removes sizes field
  *
  * Note: Cart uses productId[color]=quantity. If you had cartData with size keys,
@@ -27,6 +28,20 @@ async function migrate() {
 
         const db = mongoose.connection.db
         const collection = db.collection('products')
+        const defaultProductAttributes = {
+            releaseDate: '',
+            brand: '',
+            range: '',
+            productType: '',
+            classification: '',
+            content: '',
+            country: '',
+            collection: '',
+            manufacturer: '',
+            precautions: '',
+            usageTips: '',
+            ingredients: '',
+        }
 
         const products = await collection.find({}).toArray()
         let updated = 0
@@ -35,8 +50,9 @@ async function migrate() {
             const hasSizes = product.sizes !== undefined && product.sizes !== null
             const hasColors = product.colors !== undefined && Array.isArray(product.colors) && product.colors.length > 0
             const hasInStock = product.inStock !== undefined
+            const hasAttributes = product.productAttributes && typeof product.productAttributes === 'object'
 
-            if (!hasColors || !hasInStock || hasSizes) {
+            if (!hasColors || !hasInStock || hasSizes || !hasAttributes) {
                 const colors = hasColors
                     ? product.colors
                     : (hasSizes && Array.isArray(product.sizes))
@@ -46,7 +62,11 @@ async function migrate() {
                 const updateOp = {
                     $set: {
                         colors,
-                        inStock: hasInStock ? product.inStock : true
+                        inStock: hasInStock ? product.inStock : true,
+                        productAttributes: hasAttributes ? {
+                            ...defaultProductAttributes,
+                            ...product.productAttributes,
+                        } : defaultProductAttributes,
                     }
                 }
                 if (hasSizes) updateOp.$unset = { sizes: 1 }

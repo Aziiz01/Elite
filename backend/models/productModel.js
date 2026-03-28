@@ -1,5 +1,20 @@
 import mongoose from "mongoose";
 
+const productAttributesSchema = new mongoose.Schema({
+    releaseDate: { type: String, default: "" },
+    brand: { type: String, default: "" },
+    range: { type: String, default: "" },
+    productType: { type: String, default: "" },
+    classification: { type: String, default: "" },
+    content: { type: String, default: "" },
+    country: { type: String, default: "" },
+    collection: { type: String, default: "" },
+    manufacturer: { type: String, default: "" },
+    precautions: { type: String, default: "" },
+    usageTips: { type: String, default: "" },
+    ingredients: { type: String, default: "" },
+}, { _id: false });
+
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -9,6 +24,7 @@ const productSchema = new mongoose.Schema({
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "category", required: true },
     subCategoryId: { type: mongoose.Schema.Types.ObjectId, ref: "subcategory" },
     colors: { type: [String], required: true },
+    productAttributes: { type: productAttributesSchema, default: () => ({}) },
     inStock: { type: Boolean, required: true, default: true },
     bestseller: { type: Boolean },
     date: { type: Number, required: true }
