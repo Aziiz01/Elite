@@ -16,7 +16,8 @@ const Product = () => {
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [showAddToCartModal, setShowAddToCartModal] = useState(false)
-  const [activeTab, setActiveTab] = useState('description')
+  const [activeTab, setActiveTab] = useState('characteristics')
+  const [activeAttributePanel, setActiveAttributePanel] = useState('characteristics')
   const [reviews, setReviews] = useState([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
 
@@ -67,6 +68,20 @@ const Product = () => {
       return false
     }
   })
+
+  const attributes = productData?.productAttributes || {}
+  const characteristicRows = [
+    { label: 'Date de sortie', value: attributes.releaseDate },
+    { label: 'Marque', value: attributes.brand },
+    { label: 'Gamme', value: attributes.range },
+    { label: 'Type de produit', value: attributes.productType },
+    { label: 'Classification', value: attributes.classification },
+    { label: 'Contenance', value: attributes.content },
+    { label: 'Pays', value: attributes.country },
+    { label: 'Collection', value: attributes.collection },
+    { label: 'Fabricant', value: attributes.manufacturer },
+    { label: 'Precautions', value: attributes.precautions },
+  ].filter((row) => row.value && String(row.value).trim())
 
   if (products.length > 0 && !productData) {
     return (
@@ -212,28 +227,94 @@ const Product = () => {
       </div>
 
       {/* ---------- Description & Reviews Section ------------- */}
-      <div className='mt-20'>
-        <div className='flex'>
-          <button
-            type='button'
-            onClick={() => setActiveTab('description')}
-            className={`border px-5 py-3 text-sm ${activeTab === 'description' ? 'bg-gray-100 font-medium' : ''}`}
-          >
-            Description
-          </button>
-          <button
-            type='button'
-            onClick={() => setActiveTab('reviews')}
-            className={`border px-5 py-3 text-sm ${activeTab === 'reviews' ? 'bg-gray-100 font-medium' : ''}`}
-          >
-            Avis {reviews.length > 0 && `(${reviews.length})`}
-          </button>
+      <div className='mt-20 rounded-[2rem] border border-[#e9ddd3] bg-[#fdf9f6] p-5 sm:p-8 md:p-10'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+          <div>
+            <p className='luxury-eyebrow'>Experience produit</p>
+            <h2 className='font-display text-3xl text-[#2d231c] mt-2'>Details et avis</h2>
+          </div>
+          <div className='flex items-center gap-2 rounded-full border border-[#e7d9ce] bg-white p-1'>
+            <button
+              type='button'
+              onClick={() => setActiveTab('characteristics')}
+              className={`rounded-full px-5 py-2 text-xs uppercase tracking-[0.14em] transition ${activeTab === 'characteristics' ? 'bg-[#2f2219] text-white' : 'text-[#6a5548] hover:text-[#2f2219]'}`}
+            >
+              Caracteristiques
+            </button>
+            <button
+              type='button'
+              onClick={() => setActiveTab('reviews')}
+              className={`rounded-full px-5 py-2 text-xs uppercase tracking-[0.14em] transition ${activeTab === 'reviews' ? 'bg-[#2f2219] text-white' : 'text-[#6a5548] hover:text-[#2f2219]'}`}
+            >
+              Avis {reviews.length > 0 && `(${reviews.length})`}
+            </button>
+          </div>
         </div>
-        <div className='border px-6 py-6 text-sm'>
-          {activeTab === 'description' && (
-            <div className='flex flex-col gap-4 text-gray-500'>
-              <p>{productData.description}</p>
-              <p>Produit 100 % authentique. Paiement à la livraison disponible. Retours et échanges faciles sous 7 jours.</p>
+
+        <div className='mt-8 rounded-2xl border border-[#eaded4] bg-white px-5 py-4 sm:px-6'>
+          <div className='flex flex-wrap items-center gap-3'>
+            <StarRating rating={avgRating || 0} />
+            <span className='text-sm text-[#6f5d51]'>
+              {reviews.length > 0 ? `${avgRating || '0.0'} (${reviews.length} avis)` : 'Aucun avis pour le moment'}
+            </span>
+          </div>
+        </div>
+
+        <div className='mt-7 rounded-2xl border border-[#eaded4] bg-white px-5 py-6 sm:px-7 sm:py-8 text-sm'>
+          {activeTab === 'characteristics' && (
+            <div className='grid gap-6 lg:grid-cols-[220px_1fr]'>
+              <div className='lg:border-r lg:border-[#eaded4] lg:pr-6'>
+                <div className='flex flex-col gap-1'>
+                  <button
+                    type='button'
+                    onClick={() => setActiveAttributePanel('characteristics')}
+                    className={`text-left px-3 py-2 rounded-lg transition ${activeAttributePanel === 'characteristics' ? 'text-[#3f2b1f] bg-[#f6eee8] font-medium' : 'text-[#6f5d51] hover:bg-[#faf4ef]'}`}
+                  >
+                    Caractéristiques
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => setActiveAttributePanel('usageTips')}
+                    className={`text-left px-3 py-2 rounded-lg transition ${activeAttributePanel === 'usageTips' ? 'text-[#3f2b1f] bg-[#f6eee8] font-medium' : 'text-[#6f5d51] hover:bg-[#faf4ef]'}`}
+                  >
+                    Conseils d'utilisation
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => setActiveAttributePanel('ingredients')}
+                    className={`text-left px-3 py-2 rounded-lg transition ${activeAttributePanel === 'ingredients' ? 'text-[#3f2b1f] bg-[#f6eee8] font-medium' : 'text-[#6f5d51] hover:bg-[#faf4ef]'}`}
+                  >
+                    Ingrédients
+                  </button>
+                </div>
+              </div>
+
+              <div className='min-h-[180px]'>
+                {activeAttributePanel === 'characteristics' && (
+                  characteristicRows.length > 0 ? (
+                    <div className='space-y-3'>
+                      {characteristicRows.map((row) => (
+                        <div key={row.label} className='grid grid-cols-1 gap-1 border-b border-[#f1e6dd] pb-3 sm:grid-cols-[170px_1fr] sm:gap-4'>
+                          <p className='text-[#6f5d51] font-medium'>{row.label}</p>
+                          <p className='text-[#2f2219]'>{row.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className='text-[#6f5d51]'>Les caractéristiques seront bientôt disponibles.</p>
+                  )
+                )}
+                {activeAttributePanel === 'usageTips' && (
+                  <div className='text-[#2f2219] leading-relaxed whitespace-pre-line'>
+                    {attributes.usageTips || "Aucun conseil d'utilisation disponible pour le moment."}
+                  </div>
+                )}
+                {activeAttributePanel === 'ingredients' && (
+                  <div className='text-[#2f2219] leading-relaxed whitespace-pre-line'>
+                    {attributes.ingredients || 'Aucune information sur les ingredients pour le moment.'}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {activeTab === 'reviews' && (

@@ -1,52 +1,79 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
-import Title from '../components/Title'
 import { assets } from '../assets/assets'
 import NewsletterBox from '../components/NewsletterBox'
+import TestimonialsSection from '../components/luxury/TestimonialsSection'
 
 const About = () => {
   return (
-    <div>
+    <div className='border-t border-[#efe4db]'>
       <Helmet>
-        <title>About Us | Elite</title>
-        <meta name="description" content="Learn about Elite, Tunisia's premier destination for women's fashion and makeup. Our mission, values, and commitment to authentic quality." />
+        <title>A propos d'Elite | Maison de beaute de luxe</title>
+        <meta
+          name='description'
+          content="Decouvrez Elite, une maison de beaute soigneusement selectionnee qui allie luxe, minimalisme et confiance moderne."
+        />
       </Helmet>
 
-      <div className='text-2xl text-center pt-8 border-t'>
-          <Title text1={'ABOUT'} text2={'ELITE'} />
-      </div>
+      <section className='pt-10 sm:pt-14'>
+        <div className='rounded-[2rem] border border-[#e9ddd3] bg-[#f7efe8] p-7 sm:p-10 md:p-14'>
+          <p className='luxury-eyebrow'>A propos d'Elite</p>
+          <h1 className='luxury-heading mt-3 max-w-3xl'>Une maison beaute moderne construite autour de la confiance et de l'elegance.</h1>
+          <p className='mt-5 max-w-3xl text-sm sm:text-base text-[#5f4d41] leading-relaxed'>
+            Nous selectionnons des essentiels beaute premium pour les femmes qui recherchent esthetique raffinee,
+            performance et rituels simples au quotidien.
+          </p>
+        </div>
+      </section>
 
-      <div className='my-10 flex flex-col md:flex-row gap-16'>
-          <img className='w-full md:max-w-[450px]' src={assets.about_img} alt="Elite - Tunisian women's fashion" />
-          <div className='flex flex-col justify-center gap-6 md:w-2/4 text-gray-600'>
-              <p>Elite was founded in Tunisia with a vision to celebrate the beauty and elegance of Tunisian women. We bring together the finest in women's fashion and makeup—from timeless local craftsmanship to international trends—creating a curated space where style meets sophistication.</p>
-              <p>Our collections blend Mediterranean charm with contemporary design. From elegant abayas and modest wear to the latest in cosmetics and skincare, Elite offers an extensive selection carefully sourced from trusted brands and artisans across Tunisia and beyond.</p>
-              <b className='text-gray-800'>Our Mission</b>
-              <p>At Elite, we empower women to express their individuality through fashion and beauty. We are committed to providing exceptional quality, genuine products, and a seamless shopping experience—whether you're in Tunis, Sfax, or anywhere in Tunisia.</p>
+      <section className='py-16 sm:py-20 md:py-24'>
+        <div className='grid gap-8 lg:grid-cols-[1fr_1.05fr] lg:items-center'>
+          <div className='overflow-hidden rounded-3xl border border-[#ecdfd6] bg-[#f6eee8]'>
+            <img src={assets.about_img} alt='Identite beaute luxe Elite' className='h-full w-full object-cover' />
           </div>
-      </div>
+          <div>
+            <p className='luxury-eyebrow'>Notre histoire</p>
+            <h2 className='luxury-heading mt-3'>Quand la beaute editoriale rencontre le quotidien.</h2>
+            <p className='mt-5 text-[#5f4d41] text-sm sm:text-base leading-relaxed'>
+              Nee en Tunisie, Elite associe elegance locale et culture beaute contemporaine. Chaque collection est
+              choisie pour aider les femmes a exprimer leur style avec precision et douceur.
+            </p>
+            <p className='mt-4 text-[#5f4d41] text-sm sm:text-base leading-relaxed'>
+              Des essentiels teint aux couleurs signature, notre mission est simple: proposer des produits authentiques
+              dont l'experience est luxueuse et le rendu intemporel.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      <div className=' text-xl py-4'>
-          <Title text1={'WHY'} text2={'CHOOSE ELITE'} />
-      </div>
+      <section className='pb-16 sm:pb-20 md:pb-24'>
+        <p className='luxury-eyebrow mb-3'>Pourquoi choisir Elite</p>
+        <h2 className='luxury-heading mb-8'>Le luxe dans chaque detail.</h2>
+        <div className='grid gap-4 md:grid-cols-3'>
+          <article className='rounded-3xl border border-[#ecdfd6] bg-[#fdfaf7] p-6'>
+            <h3 className='font-display text-2xl text-[#2f2219]'>Qualite authentique</h3>
+            <p className='mt-3 text-sm text-[#5f4d41]'>
+              Chaque produit est verifie et choisi pour son rendu fiable, son fini et son confort sur la peau.
+            </p>
+          </article>
+          <article className='rounded-3xl border border-[#ecdfd6] bg-[#fdfaf7] p-6'>
+            <h3 className='font-display text-2xl text-[#2f2219]'>Service national</h3>
+            <p className='mt-3 text-sm text-[#5f4d41]'>
+              Livraison rapide et securisee partout en Tunisie, avec un emballage soigne pour les produits premium.
+            </p>
+          </article>
+          <article className='rounded-3xl border border-[#ecdfd6] bg-[#fdfaf7] p-6'>
+            <h3 className='font-display text-2xl text-[#2f2219]'>Accompagnement personnalise</h3>
+            <p className='mt-3 text-sm text-[#5f4d41]'>
+              Notre equipe vous guide sur les teintes, l'utilisation et la selection adaptee a votre rituel beaute.
+            </p>
+          </article>
+        </div>
+      </section>
 
-      <div className='flex flex-col md:flex-row text-sm mb-20'>
-          <div className='border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5'>
-            <b>Authentic Quality:</b>
-            <p className=' text-gray-600'>Every product is handpicked and verified for authenticity. We partner with reputable brands to bring you genuine fashion and makeup.</p>
-          </div>
-          <div className='border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5'>
-            <b>Nationwide Delivery:</b>
-            <p className=' text-gray-600'>We deliver across Tunisia with care. From Tunis to the coast and beyond, your order arrives safely and on time.</p>
-          </div>
-          <div className='border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5'>
-            <b>Dedicated Support:</b>
-            <p className=' text-gray-600'>Our team is here to help you find the perfect look. Questions about sizing, shades, or styling? We're just a message away.</p>
-          </div>
-      </div>
+      <TestimonialsSection />
 
-      <NewsletterBox/>
-      
+      <NewsletterBox />
     </div>
   )
 }

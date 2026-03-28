@@ -58,8 +58,8 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
 
   if (isEditing) {
     return (
-      <div className='border-b border-gray-200 py-4 last:border-0'>
-        <p className='text-sm font-medium text-gray-800 mb-2'>Modifier votre avis</p>
+      <div className='border-b border-[#ecdfd6] py-5 last:border-0'>
+        <p className='text-sm font-medium text-[#2f2219] mb-2'>Modifier votre avis</p>
         <div className='flex gap-2 mb-2'>
           {[1, 2, 3, 4, 5].map((i) => (
             <button
@@ -76,21 +76,21 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
           value={editComment}
           onChange={(e) => setEditComment(e.target.value)}
           placeholder='Votre commentaire (optionnel)'
-          className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-2 min-h-[60px]'
+          className='w-full border border-[#dccabf] rounded-xl px-3 py-2 text-sm mb-2 min-h-[60px]'
           rows={2}
         />
         <div className='flex gap-2'>
           <button
             onClick={handleUpdate}
             disabled={isSubmitting}
-            className='bg-black text-white text-xs px-4 py-2 disabled:opacity-50'
+            className='luxury-btn-primary disabled:opacity-50'
           >
-            {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+            {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
           </button>
           <button
             onClick={() => setIsEditing(false)}
             disabled={isSubmitting}
-            className='border border-gray-400 text-xs px-4 py-2'
+            className='rounded-full border border-[#d8c5b6] text-xs px-4 py-2 text-[#5f4d41]'
           >
             Annuler
           </button>
@@ -100,18 +100,18 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
   }
 
   return (
-    <div className='border-b border-gray-200 py-4 last:border-0'>
+    <div className='border-b border-[#ecdfd6] py-5 last:border-0'>
       <div className='flex justify-between items-start gap-4'>
         <div className='flex-1'>
           <div className='flex items-center gap-2 flex-wrap'>
-            <p className='font-medium text-gray-800 text-sm'>{userName}</p>
+            <p className='font-medium text-[#2f2219] text-sm'>{userName}</p>
             <StarRating rating={review.rating} />
             {dateStr && (
-              <span className='text-gray-400 text-xs'>{dateStr}</span>
+              <span className='text-[#9a8578] text-xs'>{dateStr}</span>
             )}
           </div>
           {review.comment && review.comment.trim() && (
-            <p className='text-gray-600 text-sm mt-2'>{review.comment}</p>
+            <p className='text-[#5f4d41] text-sm mt-2'>{review.comment}</p>
           )}
         </div>
         {isOwn && (
@@ -119,14 +119,14 @@ const ReviewCard = ({ review, isOwn, token, onUpdate, onDelete }) => {
             <button
               onClick={() => setIsEditing(true)}
               disabled={isSubmitting}
-              className='text-xs text-gray-600 hover:text-black underline'
+              className='text-xs text-[#5f4d41] hover:text-[#2f2219] underline'
             >
               Modifier
             </button>
             <button
               onClick={handleDelete}
               disabled={isSubmitting}
-              className='text-xs text-red-600 hover:text-red-700 underline'
+              className='text-xs text-[#b94c4c] hover:text-[#993f3f] underline'
             >
               Supprimer
             </button>

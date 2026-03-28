@@ -32,11 +32,11 @@ const ReviewList = ({
       )}
 
       {!token && (
-        <div className='flex flex-col gap-2'>
-          <p className='text-sm text-gray-500'>Connectez-vous pour écrire un avis.</p>
+        <div className='flex flex-col gap-2 rounded-2xl border border-[#eaded4] bg-[#fdf9f6] p-5'>
+          <p className='text-sm text-[#5f4d41]'>Connectez-vous pour laisser votre avis.</p>
           <button
             onClick={() => navigate('/login')}
-            className='bg-black text-white text-sm px-6 py-2 w-fit'
+            className='luxury-btn-primary w-fit'
           >
             Se connecter
           </button>
@@ -44,13 +44,13 @@ const ReviewList = ({
       )}
 
       <div>
-        <p className='text-sm font-medium text-gray-800 mb-3'>
+        <p className='text-xs uppercase tracking-[0.16em] text-[#8f7a6c] mb-3'>
           Avis {reviews.length > 0 && `(${reviews.length})`}
         </p>
         {loading ? (
-          <p className='text-gray-500 text-sm py-4'>Chargement des avis…</p>
+          <p className='text-[#6f5c50] text-sm py-4'>Chargement des avis...</p>
         ) : reviews.length === 0 ? (
-          <p className='text-gray-500 text-sm py-6'>Aucun avis pour le moment. Soyez le premier à laisser un avis !</p>
+          <p className='text-[#6f5c50] text-sm py-6'>Aucun avis pour le moment. Soyez la premiere a partager votre experience.</p>
         ) : (
           <div className='flex flex-col'>
             {reviews.map((r) => {

@@ -38,8 +38,9 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className='border border-gray-200 rounded p-4 bg-gray-50'>
-      <p className='text-sm font-medium text-gray-800 mb-2'>Écrire un avis</p>
+    <form onSubmit={handleSubmit} className='rounded-2xl border border-[#eaded4] bg-[#fdf9f6] p-5 sm:p-6'>
+      <p className='text-xs uppercase tracking-[0.16em] text-[#8f7a6c] mb-2'>Partagez votre experience</p>
+      <p className='text-sm font-medium text-[#2f2219] mb-3'>Ecrire un avis</p>
       <div className='flex gap-1 mb-3'>
         {[1, 2, 3, 4, 5].map((i) => (
           <button
@@ -58,15 +59,15 @@ const ReviewForm = ({ productId, token, onSuccess }) => {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder='Votre commentaire (optionnel)'
-        className='w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3 min-h-[80px] focus:ring-2 focus:ring-gray-400 focus:border-transparent'
+        className='w-full border border-[#dccabf] rounded-2xl px-4 py-3 text-sm mb-3 min-h-[90px] bg-white text-[#2f2219] placeholder:text-[#9a8578] focus:border-[#a88f7f]'
         rows={3}
       />
       <button
         type='submit'
         disabled={isSubmitting}
-        className='bg-black text-white text-sm px-6 py-2 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50'
+        className='luxury-btn-primary disabled:opacity-50'
       >
-        {isSubmitting ? 'Envoi…' : 'Publier'}
+        {isSubmitting ? 'Envoi...' : 'Publier'}
       </button>
     </form>
   )
