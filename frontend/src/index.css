@@ -1,90 +1,180 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design Tokens ─── */
 :root {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Cormorant Garamond", Georgia, serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  --bg:          #FAFAF9;
+  --surface:     #F0EDE8;
+  --border:      #D6D3D1;
+  --border-dark: #A8A29E;
+
+  --text:        #1C1917;
+  --text-body:   #57534E;
+  --text-muted:  #A8A29E;
+  --text-light:  #D6D3D1;
+
+  --gold:        #A16207;
+  --gold-light:  #CA8A04;
+
+  --accent:      #e02020;   /* promo/sale red */
+  --accent-bg:   #fff5f5;
+
+  --radius:      2px;
 }
 
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: var(--text);
 }
 
-html,
-body,
-#root,
-* {
-  font-family: inherit;
+html, body, #root, * { font-family: inherit; }
+::-webkit-scrollbar { display: none; }
+
+/* Active nav link underline (App.jsx applies 'active' class) */
+a.active hr { display: block; }
+
+@media (max-width: 640px) {
+  a.active { background-color: black; color: white; }
 }
 
-a.active hr{
-    display: block;
+/* ─── Keyframes ─── */
+@keyframes cart-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.25); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroLineGrow {
+  from { width: 0; opacity: 0; }
+  to   { width: 2.5rem; opacity: 1; }
 }
 
-  ::-webkit-scrollbar{
-    display: none;
-  }
-  
-  @media (max-width:640px) {
-    a.active{
-        background-color: black;
-        color: white;
-    }
-  }
-
-  @keyframes cart-badge-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-  }
-
-  .cart-badge-pulse {
-    animation: cart-badge-pulse 0.4s ease-out;
-  }
-
-  /* Consistent focus styles for form controls */
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-  }
-
-  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
-    outline: none;
-  }
-
-.luxury-heading {
-  @apply font-display text-3xl leading-[1.02] text-[#2d231c] sm:text-4xl md:text-5xl;
+/* ─── Animation utilities ─── */
+.cart-badge-pulse { animation: cart-badge-pulse 0.4s ease-out; }
+.animate-slide-down { animation: slideDown 0.2s ease-out; }
+.animate-marquee {
+  animation: marqueeScroll 40s linear infinite;
+  will-change: transform;
+}
+.hero-text-animate {
+  opacity: 0;
+  animation: heroReveal 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.hero-line-animate {
+  width: 0; opacity: 0;
+  animation: heroLineGrow 0.7s cubic-bezier(0.16,1,0.3,1) 0.05s forwards;
 }
 
-.luxury-eyebrow {
-  @apply text-[11px] uppercase tracking-[0.2em] text-[#8f7768] sm:text-xs;
+/* Reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-text-animate  { opacity: 1; animation: none; }
+  .hero-line-animate  { width: 2.5rem; opacity: 1; animation: none; }
+  .animate-marquee    { animation-play-state: paused; }
+  .reveal-section     { opacity: 1; transform: none; transition: none; }
+  .animate-slide-down { animation: none; }
 }
 
-.luxury-link {
-  @apply inline-flex items-center text-sm uppercase tracking-[0.14em] text-[#5a4639] transition hover:text-[#241a13];
-}
-
-.luxury-btn-primary {
-  @apply inline-flex items-center justify-center rounded-full border border-[#d6bca9] bg-[#f1dfd1] px-7 py-3 text-xs uppercase tracking-[0.14em] text-[#2f2219] transition duration-300 hover:-translate-y-[1px] hover:bg-[#ebd6c6] hover:shadow-[0_10px_24px_rgba(56,40,28,0.14)];
-}
-
-.luxury-btn-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-[#e7d8cb] bg-transparent px-7 py-3 text-xs uppercase tracking-[0.14em] text-[#f8efe6] transition duration-300 hover:border-[#f4e6d9] hover:bg-white/10;
-}
-
-.luxury-chip-btn {
-  @apply inline-flex items-center justify-center rounded-full border border-[#dbc8b9] px-3.5 py-2 text-[11px] uppercase tracking-[0.14em] text-[#4c3a2e] transition duration-300 hover:bg-[#f0e3d8];
-}
-
+/* ─── Scroll reveal ─── */
 .reveal-section {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 700ms ease, transform 700ms ease;
+  transform: translateY(20px);
+  transition: opacity 700ms cubic-bezier(0.16,1,0.3,1), transform 700ms cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-section.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ─── Focus ─── */
+input:focus, select:focus, textarea:focus { outline: none; }
+input:focus-visible { outline: 2px solid #111; outline-offset: 1px; }
+button:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+
+/* ─── Commerce utility classes ─── */
+
+/* Form inputs */
+.shop-input {
+  @apply w-full border border-[#e5e5e5] bg-white px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] transition-colors duration-150;
+}
+.shop-input:hover  { border-color: #bbb; }
+.shop-input:focus  { outline: none; border-color: #111; }
+
+/* Primary button — warm black */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 bg-[#1C1917] px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-all duration-300 cursor-pointer;
+}
+.btn-primary:hover { @apply bg-[#292524]; }
+.btn-primary:disabled { @apply bg-[#D6D3D1] cursor-not-allowed; }
+
+/* Outline button */
+.btn-outline {
+  @apply inline-flex items-center justify-center gap-2 border border-[#e5e5e5] bg-white px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#111] transition-colors duration-200 cursor-pointer;
+}
+.btn-outline:hover { border-color: #111; }
+
+/* Sale / promo badge */
+.badge-promo {
+  @apply inline-block bg-[#e02020] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white;
+}
+.badge-new {
+  @apply inline-block bg-[#111] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white;
+}
+.badge-bestseller {
+  @apply inline-block bg-[#f59e0b] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white;
 }
 
-.reveal-section.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+/* Section heading */
+.section-title {
+  @apply text-xl font-bold text-[#111] sm:text-2xl;
+}
+.section-eyebrow {
+  @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-[#888];
+}
+
+/* Legacy luxury aliases (landing page) */
+.luxury-eyebrow {
+  @apply text-[11px] font-medium uppercase tracking-[0.25em] text-[#A16207];
+}
+.luxury-heading   { @apply font-display font-semibold text-3xl leading-[0.92] text-[#1C1917] sm:text-4xl md:text-5xl; }
+.luxury-link      { @apply inline-flex items-center gap-2 text-sm font-medium text-[#57534E] transition-colors duration-200 hover:text-[#1C1917]; }
+.luxury-btn-primary { @apply btn-primary; }
+.luxury-btn-outline { @apply btn-outline; }
+.luxury-btn-secondary { @apply btn-outline; }
+.luxury-btn-outline-dark {
+  @apply inline-flex items-center justify-center gap-2 border border-white/30 px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.15em] text-white transition-all duration-300 cursor-pointer;
+}
+.luxury-btn-outline-dark:hover { border-color: rgba(255,255,255,0.7); background-color: rgba(255,255,255,0.07); }
+.luxury-chip-btn {
+  @apply inline-flex items-center justify-center border border-[#D6D3D1] bg-white px-3 py-1.5 text-[11px] font-medium text-[#57534E] transition-colors duration-150 cursor-pointer;
+}
+.luxury-chip-btn:hover { border-color: #1C1917; color: #1C1917; }
+.section-divider { @apply h-px w-full bg-[#D6D3D1]; }
+
+/* ─── Full-bleed breakout (counteracts App.jsx container padding) ─── */
+.bleed-x {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+@media (min-width: 640px) {
+  .bleed-x { margin-left: -5vw; margin-right: -5vw; }
+}
+@media (min-width: 768px) {
+  .bleed-x { margin-left: -7vw; margin-right: -7vw; }
+}
+@media (min-width: 1024px) {
+  .bleed-x { margin-left: -9vw; margin-right: -9vw; }
 }

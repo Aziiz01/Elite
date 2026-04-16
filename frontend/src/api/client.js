@@ -44,6 +44,12 @@ export const registerUser = (data) =>
 export const loginUser = (data) =>
   api.post('/api/user/login', data);
 
+export const forgotPassword = (email) =>
+  api.post('/api/user/forgot-password', { email });
+
+export const resetPassword = (token, newPassword) =>
+  api.post('/api/user/reset-password', { token, newPassword });
+
 export const getUserProfile = (token) =>
   api.post('/api/user/profile', {}, withAuth(token));
 
@@ -83,6 +89,9 @@ export const getUserOrders = (token) =>
 
 export const trackGuestOrder = (orderId, email) =>
   api.post('/api/order/track-guest', { orderId, email });
+
+export const trackGuestOrdersByEmail = (email) =>
+  api.post('/api/order/track-by-email', { email });
 
 // Review APIs
 export const getProductReviews = (productId) =>

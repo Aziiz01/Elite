@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+/* eslint-disable react/prop-types */
+import { useEffect, useRef, useState } from 'react'
 
 const RevealOnScroll = ({ children, className = '', delay = 0 }) => {
   const [visible, setVisible] = useState(false)

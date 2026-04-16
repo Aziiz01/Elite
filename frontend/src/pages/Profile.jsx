@@ -1,15 +1,34 @@
-import React, { useContext, useEffect, useState } from 'react'
+/* eslint-disable react/prop-types */
+import { useContext, useEffect, useState, useRef } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, useLocation, Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { getUserProfile, updateProfile, getUserOrders, getFavoritesApi, removeFavoriteApi } from '../api/client'
 import { toast } from 'react-toastify'
 
 const SECTIONS = { editProfile: 'editProfile', orders: 'orders', favorites: 'favorites' }
 
+/* ── Status badge ── */
+const StatusBadge = ({ status }) => {
+  const map = {
+    'Order Placed': { label: 'Commande passée', cls: 'bg-[#F0EDE8] text-[#57534E]' },
+    'Packing': { label: 'En préparation', cls: 'bg-[#FEF9C3] text-[#854D0E]' },
+    'Shipped': { label: 'Expédiée', cls: 'bg-[#DBEAFE] text-[#1E40AF]' },
+    'Out for delivery': { label: 'En livraison', cls: 'bg-[#DCFCE7] text-[#166534]' },
+    'Delivered': { label: 'Livrée', cls: 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]' },
+  }
+  const s = map[status] || { label: status, cls: 'bg-[#F0EDE8] text-[#57534E]' }
+  return (
+    <span className={`inline-block px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] ${s.cls}`}>
+      {s.label}
+    </span>
+  )
+}
+
 const Profile = () => {
   const { token, currency, navigate, setToken, setCartItems, loadFavorites } = useContext(ShopContext)
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [section, setSection] = useState(SECTIONS.editProfile)
@@ -17,6 +36,9 @@ const Profile = () => {
   const [orders, setOrders] = useState([])
   const [favorites, setFavorites] = useState([])
   const [editForm, setEditForm] = useState({ address: '', telephone: '', newPassword: '' })
+  const newOrderId = location.state?.newOrderId || null
+  const [showConfirm, setShowConfirm] = useState(!!location.state?.newOrderId)
+  const newOrderRef = useRef(null)
 
   const authToken = token || localStorage.getItem('token')
 
@@ -24,6 +46,20 @@ const Profile = () => {
     const s = searchParams.get('section')
     if (s && Object.values(SECTIONS).includes(s)) setSection(s)
   }, [searchParams])
+
+  /* Auto-dismiss confirmation banner after 8 seconds */
+  useEffect(() => {
+    if (!showConfirm) return
+    const t = setTimeout(() => setShowConfirm(false), 8000)
+    return () => clearTimeout(t)
+  }, [showConfirm])
+
+  /* Scroll new order card into view once orders load */
+  useEffect(() => {
+    if (newOrderId && newOrderRef.current) {
+      newOrderRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [newOrderId, orders])
 
   useEffect(() => {
     if (!authToken) {
@@ -107,229 +143,349 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className='border-t pt-14 min-h-[40vh] flex items-center justify-center'>
+      <div className='flex min-h-[40vh] items-center justify-center border-t border-[#E5E5E5] pt-14'>
         <Helmet><title>Chargement | Elite</title></Helmet>
-        <p className='text-gray-500'>Chargement...</p>
+        <span className='text-[11px] uppercase tracking-[0.25em] text-[#A8A29E]'>Chargement...</span>
       </div>
     )
   }
 
-  const userName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || 'User' : 'User'
+  const userName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Client' : 'Client'
+  const userInitial = userName.charAt(0).toUpperCase()
+
+  const navItems = [
+    { id: SECTIONS.editProfile, label: 'Mon profil' },
+    { id: SECTIONS.orders, label: 'Commandes' },
+    { id: SECTIONS.favorites, label: 'Favoris' },
+  ]
 
   return (
-    <div className='border-t border-[#efe4db] pt-10 pb-20 sm:pt-14'>
+    <main>
       <Helmet>
         <title>Mon compte | Elite</title>
-        <meta name="description" content="Gérez votre compte Elite. Modifiez votre profil, consultez vos commandes et favoris." />
+        <meta name='description' content='Gérez votre compte Elite. Modifiez votre profil, consultez vos commandes et favoris.' />
       </Helmet>
-      <section className='mb-8 rounded-[2rem] border border-[#e9ddd3] bg-[#f7efe8] p-6 sm:p-8 md:p-10'>
-        <p className='luxury-eyebrow'>Mon compte</p>
-        <h1 className='luxury-heading mt-2'>Bienvenue, {userName}</h1>
-        <p className='mt-3 text-sm text-[#5f4d41]'>Gérez vos informations, commandes et favoris dans un espace unique.</p>
-      </section>
 
-      <div className='flex flex-col md:flex-row gap-8 md:gap-12'>
-        {/* Sidebar */}
-        <aside className='md:w-56 flex-shrink-0'>
-          <div className='rounded-3xl border border-[#ecdfd6] bg-[#fdfaf7] p-4 md:p-5'>
-            <p className='text-[#8e7767] text-xs uppercase tracking-[0.16em] mb-4'>Menu</p>
-            <nav className='flex flex-row md:flex-col gap-2 flex-wrap md:flex-nowrap'>
-              <button
-                onClick={() => goTo(SECTIONS.editProfile)}
-                className={`text-left py-2.5 px-3 rounded-full text-sm transition ${section === SECTIONS.editProfile ? 'bg-[#2f2219] text-white font-medium' : 'text-[#5f4d41] hover:bg-[#f4ebe4]'}`}
-              >
-                Modifier le profil
-              </button>
-              <button
-                onClick={() => goTo(SECTIONS.orders)}
-                className={`text-left py-2.5 px-3 rounded-full text-sm transition ${section === SECTIONS.orders ? 'bg-[#2f2219] text-white font-medium' : 'text-[#5f4d41] hover:bg-[#f4ebe4]'}`}
-              >
-                Commandes
-              </button>
-              <button
-                onClick={() => goTo(SECTIONS.favorites)}
-                className={`text-left py-2.5 px-3 rounded-full text-sm transition ${section === SECTIONS.favorites ? 'bg-[#2f2219] text-white font-medium' : 'text-[#5f4d41] hover:bg-[#f4ebe4]'}`}
-              >
-                Favoris
-              </button>
-              <button
-                onClick={logout}
-                className='text-left py-2.5 px-3 text-sm text-[#8f5f5f] hover:bg-[#f8ecec] rounded-full md:mt-3'
-              >
-                Déconnexion
-              </button>
-            </nav>
+      {/* ── Account hero ── */}
+      <div className='bleed-x border-b border-[#E5E5E5] bg-[#F0EDE8] px-8 py-10 sm:px-12 sm:py-12 md:px-16 lg:px-20'>
+        <div className='flex items-center gap-5'>
+          <div className='flex h-14 w-14 flex-shrink-0 items-center justify-center bg-[#1C1917] text-xl font-bold text-white sm:h-16 sm:w-16'>
+            {userInitial}
           </div>
-        </aside>
+          <div>
+            <span className='luxury-eyebrow'>Mon compte</span>
+            <h1
+              className='mt-1 font-display font-semibold leading-[0.92] text-[#1C1917]'
+              style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)' }}
+            >
+              {userName}
+            </h1>
+            {user?.email && (
+              <p className='mt-1 text-[12px] text-[#A8A29E]'>{user.email}</p>
+            )}
+          </div>
+        </div>
+      </div>
 
-        {/* Main content */}
-        <main className='flex-1 min-w-0'>
-          {section === SECTIONS.orders && (
+      {/* ── Nav tabs ── */}
+      <div className='bleed-x border-b border-[#E5E5E5]'>
+        <div className='flex overflow-x-auto px-8 sm:px-12 md:px-16 lg:px-20' style={{ scrollbarWidth: 'none' }}>
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type='button'
+              onClick={() => goTo(item.id)}
+              className={`flex-shrink-0 border-b-2 px-4 py-4 text-[11px] font-medium uppercase tracking-[0.15em] transition-colors duration-150 ${
+                section === item.id
+                  ? 'border-[#A16207] text-[#1C1917]'
+                  : 'border-transparent text-[#A8A29E] hover:text-[#57534E]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+          <div className='ml-auto flex-shrink-0'>
+            <button
+              type='button'
+              onClick={logout}
+              className='border-b-2 border-transparent px-4 py-4 text-[11px] font-medium uppercase tracking-[0.15em] text-[#A8A29E] transition-colors hover:text-[#e02020]'
+            >
+              Déconnexion
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Content ── */}
+      <div className='py-10 sm:py-14'>
+
+        {/* Edit Profile */}
+        {section === SECTIONS.editProfile && (
+          <div className='grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12'>
+            {/* Read-only info card */}
             <div>
-              <h1 className='font-display text-3xl text-[#2f2219] mb-6'>Mes commandes</h1>
-              <div className='overflow-x-auto rounded-2xl border border-[#ecdfd6] bg-[#fdfaf7]'>
-                <table className='w-full text-sm'>
-                  <thead>
-                    <tr className='border-b border-[#ecdfd6] text-left text-[#7f695c]'>
-                      <th className='py-3 pr-4'>N°</th>
-                      <th className='py-3 pr-4'>Date</th>
-                      <th className='py-3 pr-4'>Produits</th>
-                      <th className='py-3 pr-4'>Statut</th>
-                      <th className='py-3 pr-4'>Total</th>
-                      <th className='py-3'>Qté</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className='py-8 text-[#9d887a] text-center'>
-                          Aucune commande
-                        </td>
-                      </tr>
-                    ) : (
-                      orders.map((order) => (
-                        <tr key={order._id} className='border-b border-[#f1e6dd]'>
-                          <td className='py-4 pr-4 font-mono text-[#8c7668]'>#{String(order._id).slice(-6)}</td>
-                          <td className='py-4 pr-4'>{new Date(order.date).toLocaleDateString()}</td>
-                          <td className='py-4 pr-4'>
-                            <div className='flex items-center gap-2'>
-                              {(order.items || []).slice(0, 3).map((item, index) => (
-                                <div
-                                  key={`${order._id}-${item?._id || index}`}
-                                  className='h-10 w-10 rounded-lg border border-[#ecded3] bg-[#f5ede6] overflow-hidden'
-                                  title={item?.name || 'Produit'}
-                                >
-                                  {item?.image?.[0] ? (
-                                    <img
-                                      src={item.image[0]}
-                                      alt={item?.name || 'Produit'}
-                                      className='h-full w-full object-cover'
-                                      loading='lazy'
-                                    />
-                                  ) : (
-                                    <div className='h-full w-full bg-[#f1e6dd]' />
-                                  )}
-                                </div>
-                              ))}
-                              {(order.items?.length || 0) > 3 && (
-                                <span className='text-xs text-[#8c7668]'>+{order.items.length - 3}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className='py-4 pr-4'>{order.status}</td>
-                          <td className='py-4 pr-4 font-medium text-[#2f2219]'>{order.amount}{currency}</td>
-                          <td className='py-4'>
-                            {(order.items || []).reduce((sum, item) => sum + (Number(item?.quantity) || 0), 0)}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              <p className='section-eyebrow mb-4'>Informations du compte</p>
+              <div className='border border-[#E5E5E5] bg-white'>
+                {[
+                  { label: 'Prénom', value: user?.firstName },
+                  { label: 'Nom', value: user?.lastName },
+                  { label: 'Email', value: user?.email },
+                  { label: 'Ville', value: user?.city },
+                  { label: 'Code postal', value: user?.postalCode },
+                ].filter((r) => r.value).map((row, i, arr) => (
+                  <div
+                    key={row.label}
+                    className={`flex items-center gap-4 px-5 py-3.5 ${i < arr.length - 1 ? 'border-b border-[#F0EDE8]' : ''}`}
+                  >
+                    <span className='w-24 flex-shrink-0 text-[10px] uppercase tracking-[0.18em] text-[#A8A29E]'>{row.label}</span>
+                    <span className='text-sm text-[#1C1917]'>{row.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
 
-          {section === SECTIONS.favorites && (
+            {/* Edit form */}
             <div>
-              <h1 className='font-display text-3xl text-[#2f2219] mb-6'>Favoris</h1>
-              {favorites.length === 0 ? (
-                <p className='text-[#6f5c50] py-8'>Aucun favori. Ajoutez des produits depuis la collection.</p>
-              ) : (
-                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
-                  {favorites.map((item) => (
-                    <div key={item._id} className='group relative border border-[#ecdfd6] rounded-2xl overflow-hidden bg-[#fdfaf7]'>
-                      <Link to={`/product/${item.productId}`} className='block' onClick={() => scrollTo(0, 0)}>
-                        <div className='aspect-square bg-[#f5ede6]'>
-                          <img
-                            src={item.image?.[0]}
-                            alt={item.name}
-                            className='w-full h-full object-contain'
-                          />
-                        </div>
-                        <div className='p-3'>
-                          <p className='text-sm line-clamp-2 text-[#2f2219]'>{item.name}</p>
-                          <p className='text-sm font-medium mt-1'>
-                            {item.newPrice != null && item.newPrice !== '' ? (
-                              <span><span className='line-through text-[#8f7a6c]'>{item.price}{currency}</span> <span className='text-[#2f2219]'>{item.newPrice}{currency}</span></span>
-                            ) : (
-                              <span>{item.price}{currency}</span>
-                            )}
-                          </p>
-                        </div>
-                      </Link>
-                      <button
-                        type='button'
-                        onClick={() => handleRemoveFavorite(item.productId)}
-                        className='absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-[#7c6a5d] hover:text-pink-500 hover:bg-white shadow-sm'
-                        aria-label='Retirer des favoris'
-                      >
-                        <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'><path d='M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z' /></svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {section === SECTIONS.editProfile && (
-            <div>
-              <h1 className='font-display text-3xl text-[#2f2219] mb-6'>Modifier le profil</h1>
-              <div className='mb-6 text-sm text-[#5f4d41] rounded-2xl border border-[#ecdfd6] bg-[#fdfaf7] p-4'>
-                <p className='font-medium text-[#2f2219] mb-1'>Informations du compte (lecture seule)</p>
-                <p>{user?.firstName} {user?.lastName}</p>
-                <p>{user?.email}</p>
-                <p>{user?.city}, {user?.postalCode}</p>
-              </div>
-              <form onSubmit={handleSave} className='flex flex-col gap-4 max-w-md'>
+              <p className='section-eyebrow mb-4'>Modifier</p>
+              <form onSubmit={handleSave} className='flex flex-col gap-5'>
                 <div>
-                  <label className='block text-sm font-medium text-[#5f4d41] mb-1'>Adresse</label>
+                  <label htmlFor='profile-address' className='mb-1.5 block text-[11px] uppercase tracking-[0.15em] text-[#57534E]'>
+                    Adresse
+                  </label>
                   <input
+                    id='profile-address'
                     name='address'
                     value={editForm.address}
                     onChange={onChange}
                     required
-                    className='w-full px-4 py-2.5 border border-[#dccabf] rounded-xl bg-white focus:border-[#a88f7f]'
+                    autoComplete='street-address'
+                    className='shop-input'
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-[#5f4d41] mb-1'>Téléphone</label>
+                  <label htmlFor='profile-telephone' className='mb-1.5 block text-[11px] uppercase tracking-[0.15em] text-[#57534E]'>
+                    Téléphone
+                  </label>
                   <input
+                    id='profile-telephone'
                     name='telephone'
                     type='tel'
                     value={editForm.telephone}
                     onChange={onChange}
                     required
                     minLength={8}
-                    className='w-full px-4 py-2.5 border border-[#dccabf] rounded-xl bg-white focus:border-[#a88f7f]'
+                    autoComplete='tel'
+                    className='shop-input'
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-[#5f4d41] mb-1'>Nouveau mot de passe (laisser vide pour conserver)</label>
+                  <label htmlFor='profile-password' className='mb-1.5 block text-[11px] uppercase tracking-[0.15em] text-[#57534E]'>
+                    Nouveau mot de passe
+                  </label>
                   <input
+                    id='profile-password'
                     name='newPassword'
                     type='password'
                     value={editForm.newPassword}
                     onChange={onChange}
                     minLength={8}
-                    placeholder='Min. 8 caractères'
-                    className='w-full px-4 py-2.5 border border-[#dccabf] rounded-xl bg-white focus:border-[#a88f7f]'
+                    placeholder="Laisser vide pour conserver l'actuel"
+                    autoComplete='new-password'
+                    className='shop-input'
                   />
                 </div>
-                <button
-                  type='submit'
-                  disabled={saving}
-                  className='luxury-btn-primary w-fit disabled:opacity-60'
-                >
-                  {saving ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
+                <div className='pt-1'>
+                  <button
+                    type='submit'
+                    disabled={saving}
+                    className='btn-primary disabled:opacity-60'
+                  >
+                    {saving ? 'Enregistrement...' : 'Enregistrer'}
+                  </button>
+                </div>
               </form>
             </div>
-          )}
-        </main>
+          </div>
+        )}
+
+        {/* Orders */}
+        {section === SECTIONS.orders && (
+          <div>
+            <p className='section-eyebrow mb-6'>Mes commandes</p>
+
+            {/* ── Order confirmation banner ── */}
+            {showConfirm && (
+              <div className='mb-6 flex items-start justify-between gap-4 border border-[#BBF7D0] bg-[#F0FDF4] px-5 py-4'>
+                <div className='flex items-start gap-4'>
+                  {/* Checkmark */}
+                  <div className='flex h-9 w-9 flex-shrink-0 items-center justify-center border border-[#BBF7D0] bg-[#DCFCE7]'>
+                    <svg className='h-4 w-4 text-[#166534]' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={2}>
+                      <path strokeLinecap='round' strokeLinejoin='round' d='M4.5 12.75l6 6 9-13.5' />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className='text-sm font-semibold text-[#166534]'>Commande confirmée</p>
+                    <p className='mt-0.5 text-[12px] text-[#57534E]'>
+                      Votre commande a été passée avec succès. Vous serez contacté pour la livraison.
+                    </p>
+                    {newOrderId && (
+                      <p className='mt-1 font-mono text-[11px] text-[#166534]'>
+                        Réf. #{String(newOrderId).slice(-8).toUpperCase()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setShowConfirm(false)}
+                  aria-label='Fermer'
+                  className='flex-shrink-0 text-[#A8A29E] transition-colors hover:text-[#1C1917]'
+                >
+                  <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={2}>
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {orders.length === 0 ? (
+              <div className='flex flex-col items-center gap-4 border border-[#E5E5E5] py-20 text-center'>
+                <svg className='h-8 w-8 text-[#D6D3D1]' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={1.5}>
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z' />
+                </svg>
+                <p className='text-sm text-[#A8A29E]'>Aucune commande pour le moment.</p>
+                <Link to='/collection' className='btn-primary mt-2'>Découvrir la boutique</Link>
+              </div>
+            ) : (
+              <div className='flex flex-col gap-3'>
+                {orders.map((order) => {
+                  const isNew = newOrderId && String(order._id) === String(newOrderId)
+                  return (
+                    <div
+                      key={order._id}
+                      ref={isNew ? newOrderRef : null}
+                      className={`border bg-white transition-colors duration-500 ${
+                        isNew
+                          ? 'border-[#A16207] ring-1 ring-[#A16207]/20'
+                          : 'border-[#E5E5E5]'
+                      }`}
+                    >
+                      {/* New order label */}
+                      {isNew && (
+                        <div className='flex items-center gap-2 bg-[#A16207] px-5 py-1.5'>
+                          <svg className='h-3 w-3 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={2.5}>
+                            <path strokeLinecap='round' strokeLinejoin='round' d='M4.5 12.75l6 6 9-13.5' />
+                          </svg>
+                          <span className='text-[10px] font-semibold uppercase tracking-[0.2em] text-white'>
+                            Nouvelle commande
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Order header */}
+                      <div className='flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-[#F0EDE8] px-5 py-3'>
+                        <span className='font-mono text-[11px] text-[#A8A29E]'>#{String(order._id).slice(-8).toUpperCase()}</span>
+                        <span className='text-[11px] text-[#57534E]'>{new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                        <StatusBadge status={order.status} />
+                        <span className='ml-auto text-sm font-semibold text-[#1C1917]'>{order.amount}{currency}</span>
+                      </div>
+
+                      {/* Products row */}
+                      <div className='flex items-center gap-3 px-5 py-3.5'>
+                        <div className='flex items-center gap-2'>
+                          {(order.items || []).slice(0, 4).map((item, index) => (
+                            <div
+                              key={`${order._id}-${item?._id || index}`}
+                              className='h-12 w-12 flex-shrink-0 overflow-hidden bg-[#F0EDE8]'
+                              title={item?.name || 'Produit'}
+                            >
+                              {item?.image?.[0] ? (
+                                <img
+                                  src={item.image[0]}
+                                  alt={item?.name || 'Produit'}
+                                  className='h-full w-full object-cover'
+                                  loading='lazy'
+                                />
+                              ) : (
+                                <div className='h-full w-full bg-[#F0EDE8]' />
+                              )}
+                            </div>
+                          ))}
+                          {(order.items?.length || 0) > 4 && (
+                            <span className='text-[11px] text-[#A8A29E]'>+{order.items.length - 4}</span>
+                          )}
+                        </div>
+                        <div className='ml-auto text-right'>
+                          <p className='text-[11px] text-[#A8A29E]'>
+                            {(order.items || []).reduce((s, i) => s + (Number(i?.quantity) || 0), 0)} article{(order.items || []).reduce((s, i) => s + (Number(i?.quantity) || 0), 0) > 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Favorites */}
+        {section === SECTIONS.favorites && (
+          <div>
+            <p className='section-eyebrow mb-6'>Mes favoris</p>
+            {favorites.length === 0 ? (
+              <div className='flex flex-col items-center gap-4 border border-[#E5E5E5] py-20 text-center'>
+                <svg className='h-8 w-8 text-[#D6D3D1]' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth={1.5}>
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z' />
+                </svg>
+                <p className='text-sm text-[#A8A29E]'>Aucun favori pour le moment.</p>
+                <Link to='/collection' className='btn-primary mt-2'>Explorer la collection</Link>
+              </div>
+            ) : (
+              <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
+                {favorites.map((item) => (
+                  <div key={item._id} className='group relative border border-[#E5E5E5] bg-white'>
+                    <Link to={`/product/${item.productId}`} className='block' onClick={() => scrollTo(0, 0)}>
+                      <div className='aspect-square bg-[#F0EDE8]'>
+                        <img
+                          src={item.image?.[0]}
+                          alt={item.name}
+                          className='h-full w-full object-contain'
+                          loading='lazy'
+                        />
+                      </div>
+                      <div className='p-3'>
+                        <p className='line-clamp-2 text-[12px] text-[#1C1917]'>{item.name}</p>
+                        <p className='mt-1.5 text-[12px] font-medium'>
+                          {item.newPrice != null && item.newPrice !== '' ? (
+                            <>
+                              <span className='line-through text-[#A8A29E]'>{item.price}{currency}</span>{' '}
+                              <span className='text-[#e02020]'>{item.newPrice}{currency}</span>
+                            </>
+                          ) : (
+                            <span className='text-[#1C1917]'>{item.price}{currency}</span>
+                          )}
+                        </p>
+                      </div>
+                    </Link>
+                    <button
+                      type='button'
+                      onClick={() => handleRemoveFavorite(item.productId)}
+                      className='absolute right-2 top-2 flex h-7 w-7 items-center justify-center bg-white/90 text-[#A8A29E] shadow-sm transition-colors hover:text-[#e02020]'
+                      aria-label='Retirer des favoris'
+                    >
+                      <svg className='h-3.5 w-3.5' fill='currentColor' viewBox='0 0 24 24'>
+                        <path d='M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z' />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   )
 }
 

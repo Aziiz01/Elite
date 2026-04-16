@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { ShopContext } from '../context/ShopContext'
 import { placeOrder as placeOrderApi, placeGuestOrder, getUserProfile } from '../api/client'
@@ -154,7 +153,9 @@ const PlaceOrder = () => {
             const response = await placeOrderApi(orderPayload, authToken)
             if (response.data.success) {
                 setCartItems({})
-                navigate('/profile?section=orders')
+                navigate('/profile?section=orders', {
+                    state: { newOrderId: response.data.orderId }
+                })
             } else {
                 toast.error(response.data.message)
             }
@@ -170,56 +171,65 @@ const PlaceOrder = () => {
 
 
     return (
-        <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
+        <form onSubmit={onSubmitHandler} className='border-t border-[#e5e5e5] pt-10 min-h-[80vh]'>
             <Helmet>
                 <title>Paiement | Elite</title>
-                <meta name="description" content="Finalisez votre commande. Paiement à la livraison disponible." />
+                <meta name='description' content='Finalisez votre commande. Paiement à la livraison disponible.' />
             </Helmet>
-            {/* ------------- Left Side ---------------- */}
-            <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
 
-                {isGuest && (
-                    <p className='text-sm text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded'>
-                        Commande en tant qu'invité. Veuillez remplir toutes les informations requises.
-                    </p>
-                )}
-                <div className='text-xl sm:text-2xl my-3'>
-                    <Title text1={'INFORMATIONS'} text2={'LIVRAISON'} />
-                </div>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Prénom' />
-                    <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Nom' />
-                </div>
-                <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="email" placeholder='E-mail' />
-                <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Rue' />
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Ville' />
-                    <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Région' />
-                </div>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Code postal' />
-                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="text" placeholder='Pays' />
-                </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full focus:ring-2 focus:ring-gray-400 focus:border-transparent' type="number" placeholder='Téléphone' />
+            <div className='mb-8'>
+                <p className='section-eyebrow mb-1'>Commande</p>
+                <h1 className='text-2xl font-bold text-[#111]'>Informations de livraison</h1>
             </div>
 
-            {/* ------------- Right Side ------------------ */}
-            <div className='mt-8'>
-
-                <div className='mt-8 min-w-80'>
-                    <CartTotal />
+            <div className='flex flex-col lg:flex-row gap-10'>
+                {/* Left — delivery form */}
+                <div className='flex-1 flex flex-col gap-3'>
+                    {isGuest && (
+                        <p className='text-[12px] text-[#555] bg-[#f8f8f8] border border-[#e5e5e5] px-4 py-3'>
+                            Commande en tant qu'invité. Veuillez remplir toutes les informations.
+                        </p>
+                    )}
+                    <div className='flex gap-3'>
+                        <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='shop-input' type='text' placeholder='Prénom' />
+                        <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='shop-input' type='text' placeholder='Nom' />
+                    </div>
+                    <input required onChange={onChangeHandler} name='email' value={formData.email} className='shop-input' type='email' placeholder='E-mail' />
+                    <input required onChange={onChangeHandler} name='street' value={formData.street} className='shop-input' type='text' placeholder='Rue' />
+                    <div className='flex gap-3'>
+                        <input required onChange={onChangeHandler} name='city' value={formData.city} className='shop-input' type='text' placeholder='Ville' />
+                        <input required onChange={onChangeHandler} name='state' value={formData.state} className='shop-input' type='text' placeholder='Région' />
+                    </div>
+                    <div className='flex gap-3'>
+                        <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='shop-input' type='number' placeholder='Code postal' />
+                        <input required onChange={onChangeHandler} name='country' value={formData.country} className='shop-input' type='text' placeholder='Pays' />
+                    </div>
+                    <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='shop-input' type='number' placeholder='Téléphone' />
                 </div>
 
-                <div className='mt-12'>
-                    <p className='text-sm text-gray-600 mb-4'>Paiement à la livraison — Payez à la réception de votre commande.</p>
-                    <div className='w-full text-end'>
-                        <button
-                            type='submit'
-                            disabled={submitting}
-                            className='bg-black text-white px-16 py-3 text-sm rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed'
-                        >
-                            {submitting ? 'Envoi en cours…' : 'PASSER COMMANDE'}
-                        </button>
+                {/* Right — summary */}
+                <div className='lg:w-80 flex-shrink-0'>
+                    <div className='border border-[#e5e5e5] p-6'>
+                        <p className='text-[11px] font-semibold uppercase tracking-[0.15em] text-[#111] mb-5'>Résumé de commande</p>
+                        <CartTotal />
+                        <div className='mt-6 border-t border-[#e5e5e5] pt-5'>
+                            <div className='flex items-start gap-2.5 mb-5'>
+                                <div className='w-4 h-4 border-2 border-[#111] rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center'>
+                                    <div className='w-1.5 h-1.5 rounded-full bg-[#111]' />
+                                </div>
+                                <div>
+                                    <p className='text-[12px] font-semibold text-[#111]'>Paiement à la livraison</p>
+                                    <p className='text-[11px] text-[#888] mt-0.5'>Payez en espèces à la réception.</p>
+                                </div>
+                            </div>
+                            <button
+                                type='submit'
+                                disabled={submitting}
+                                className='btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed'
+                            >
+                                {submitting ? 'Envoi en cours…' : 'Confirmer la commande'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

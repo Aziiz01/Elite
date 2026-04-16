@@ -2,160 +2,214 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
-import Title from '../components/Title';
-import { assets } from '../assets/assets';
-import CartTotal from '../components/CartTotal';
-import CheckoutAuthModal from '../components/CheckoutAuthModal';
+import { assets } from '../assets/assets'
+import CartTotal from '../components/CartTotal'
+import CheckoutAuthModal from '../components/CheckoutAuthModal'
 
 const Cart = () => {
-
-  const { products, currency, cartItems, updateQuantity, navigate, token } = useContext(ShopContext);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-
-  const [cartData, setCartData] = useState([]);
+  const { products, currency, cartItems, updateQuantity, navigate, token } = useContext(ShopContext)
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
+  const [cartData, setCartData] = useState([])
 
   useEffect(() => {
-
     if (products.length > 0) {
-      const tempData = [];
+      const tempData = []
       for (const items in cartItems) {
         for (const item in cartItems[items]) {
           if (cartItems[items][item] > 0) {
-            tempData.push({
-              _id: items,
-              color: item,
-              quantity: cartItems[items][item]
-            })
+            tempData.push({ _id: items, color: item, quantity: cartItems[items][item] })
           }
         }
       }
-      setCartData(tempData);
+      setCartData(tempData)
     }
   }, [cartItems, products])
 
   const validCartCount = cartData.filter((item) => {
-    const p = products.find((pr) => pr._id === item._id);
-    return p && p.inStock !== false;
-  }).length;
+    const p = products.find((pr) => pr._id === item._id)
+    return p && p.inStock !== false
+  }).length
 
   return (
-    <div className='border-t pt-14'>
+    <div className='border-t border-[#e5e5e5] pt-10'>
       <Helmet>
         <title>Votre panier | Elite</title>
-        <meta name="description" content="Consultez votre panier et passez commande. Paiement à la livraison disponible en Tunisie." />
+        <meta name='description' content='Consultez votre panier et passez commande. Paiement à la livraison disponible.' />
       </Helmet>
 
-      <div className=' text-2xl mb-3'>
-        <Title text1={'VOTRE'} text2={'PANIER'} />
+      <div className='mb-8'>
+        <p className='section-eyebrow mb-1'>Récapitulatif</p>
+        <h1 className='text-2xl font-bold text-[#111]'>Votre panier</h1>
       </div>
 
-      <div>
-        {cartData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-            <p className="text-gray-600 text-lg mb-2">Votre panier est vide</p>
-            <p className="text-gray-500 text-sm mb-6">Ajoutez des articles pour commencer.</p>
-            <Link
-              to="/collection"
-              className="inline-block px-6 py-3 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-            >
-              Découvrir la collection
-            </Link>
-          </div>
-        ) : (
-          cartData.map((item, index) => {
+      {cartData.length === 0 ? (
+        <div className='flex flex-col items-center justify-center py-20 text-center'>
+          <p className='text-[#111] font-medium mb-2'>Votre panier est vide</p>
+          <p className='text-[13px] text-[#888] mb-8'>Ajoutez des articles pour commencer.</p>
+          <Link to='/collection' className='btn-primary'>Découvrir la collection</Link>
+        </div>
+      ) : (
+        <div className='flex flex-col lg:flex-row gap-10'>
+          {/* Cart items */}
+          <div className='flex-1'>
+            {cartData.map((item) => {
+              const productData = products.find((p) => p._id === item._id)
+              const colorHex = /^#[0-9A-Fa-f]{6}$/.test(item.color) ? item.color : '#9ca3af'
 
-            const productData = products.find((product) => product._id === item._id);
-            const colorHex = /^#[0-9A-Fa-f]{6}$/.test(item.color) ? item.color : '#9ca3af';
-
-            if (!productData) {
-              return (
-                <div key={`${item._id}-${item.color}-unavailable`} className='py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4'>
-                  <div className='flex items-start gap-6'>
-                    <div className='w-16 sm:w-20 h-16 sm:h-20 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs'>—</div>
-                    <div>
-                      <p className='text-xs sm:text-lg font-medium text-gray-500'>Produit indisponible</p>
-                      <p className='text-xs text-gray-400 mt-1'>L'article a peut-être été retiré du catalogue</p>
+              if (!productData) {
+                return (
+                  <div key={`${item._id}-${item.color}-unavailable`} className='flex items-center gap-4 py-4 border-b border-[#f0f0f0]'>
+                    <div className='w-16 h-20 bg-[#f5f5f5] flex-shrink-0 flex items-center justify-center'>
+                      <span className='text-[#bbb] text-xs'>—</span>
                     </div>
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-[13px] text-[#aaa]'>Produit indisponible</p>
+                      <p className='text-[11px] text-[#bbb] mt-0.5'>L'article a peut-être été retiré du catalogue</p>
+                    </div>
+                    <button
+                      type='button'
+                      onClick={() => updateQuantity(item._id, item.color, 0)}
+                      className='text-[#bbb] hover:text-[#e02020] transition-colors cursor-pointer'
+                      aria-label='Supprimer'
+                    >
+                      <img src={assets.bin_icon} className='w-4 h-4 opacity-40 hover:opacity-70' alt='Supprimer' />
+                    </button>
                   </div>
-                  <span className='text-sm text-gray-400'>—</span>
-                  <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Supprimer" title="Retirer du panier" />
-                </div>
-              );
-            }
+                )
+              }
 
-            const isOutOfStock = productData.inStock === false
+              const isOutOfStock = productData.inStock === false
+              const displayPrice = productData.newPrice != null && productData.newPrice !== ''
+                ? Number(productData.newPrice)
+                : Number(productData.price)
 
-            return (
-              <div key={`${item._id}-${item.color}`} className={`py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4 ${isOutOfStock ? 'opacity-75' : ''}`}>
-                <div className=' flex items-start gap-6'>
-                  <img className='w-16 sm:w-20 object-cover' src={productData.image?.[0]} alt={productData.name} />
-                  <div>
-                    <p className='text-xs sm:text-lg font-medium flex items-center gap-2 flex-wrap'>
-                      {productData.name}
-                      {isOutOfStock && (
-                        <span className='text-red-600 text-xs font-medium'>Rupture de stock</span>
-                      )}
-                    </p>
-                    <div className='flex items-center gap-5 mt-2'>
+              return (
+                <div
+                  key={`${item._id}-${item.color}`}
+                  className={`flex items-start gap-4 sm:gap-5 py-5 border-b border-[#f0f0f0] ${isOutOfStock ? 'opacity-60' : ''}`}
+                >
+                  {/* Image */}
+                  <Link to={`/product/${item._id}`} onClick={() => scrollTo(0, 0)} className='flex-shrink-0'>
+                    <div className='w-16 h-20 sm:w-20 sm:h-24 bg-[#f5f5f5] overflow-hidden'>
+                      <img
+                        src={productData.image?.[0]}
+                        alt={productData.name}
+                        className='w-full h-full object-contain'
+                      />
+                    </div>
+                  </Link>
+
+                  {/* Info */}
+                  <div className='flex-1 min-w-0'>
+                    <Link to={`/product/${item._id}`} onClick={() => scrollTo(0, 0)}>
+                      <p className='text-[13px] font-medium text-[#111] leading-snug line-clamp-2 hover:text-[#555] transition-colors'>
+                        {productData.name}
+                      </p>
+                    </Link>
+
+                    <div className='mt-1.5 flex items-center gap-2 flex-wrap'>
                       {productData.newPrice != null && productData.newPrice !== '' ? (
-                        <span>
-                          <span className='line-through text-gray-500'>{productData.price}{currency}</span>
-                          <span className='ml-1 font-medium text-gray-900'>{productData.newPrice}{currency}</span>
-                        </span>
+                        <div className='flex items-baseline gap-1.5'>
+                          <span className='text-[13px] font-semibold text-[#e02020]'>{displayPrice}{currency}</span>
+                          <span className='text-[11px] text-[#bbb] line-through'>{productData.price}{currency}</span>
+                        </div>
                       ) : (
-                        <p>{productData.price}{currency}</p>
+                        <span className='text-[13px] font-semibold text-[#111]'>{displayPrice}{currency}</span>
                       )}
                       <span
-                        className='w-6 h-6 rounded-full border border-gray-300 flex-shrink-0 inline-block'
+                        className='w-4 h-4 rounded-full border border-[#ddd] flex-shrink-0 inline-block'
                         style={{ backgroundColor: colorHex }}
                         title={item.color}
                       />
+                      {isOutOfStock && (
+                        <span className='text-[10px] font-semibold uppercase tracking-[0.1em] text-[#e02020]'>Rupture de stock</span>
+                      )}
+                    </div>
+
+                    {/* Quantity + delete */}
+                    <div className='mt-3 flex items-center gap-3'>
+                      <div className='flex items-center'>
+                        <button
+                          type='button'
+                          disabled={isOutOfStock}
+                          onClick={() => updateQuantity(item._id, item.color, Math.max(0, item.quantity - 1))}
+                          className='w-7 h-7 border border-[#e5e5e5] flex items-center justify-center text-[#555] hover:border-[#111] transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-30 text-sm'
+                        >
+                          −
+                        </button>
+                        <input
+                          type='number'
+                          min={1}
+                          value={item.quantity}
+                          disabled={isOutOfStock}
+                          onChange={(e) => {
+                            if (isOutOfStock) return
+                            const num = parseInt(e.target.value, 10)
+                            if (!isNaN(num) && num >= 0) updateQuantity(item._id, item.color, num)
+                          }}
+                          className='w-10 h-7 border-y border-[#e5e5e5] text-center text-[12px] text-[#111] focus:outline-none disabled:bg-[#f8f8f8] disabled:cursor-not-allowed'
+                        />
+                        <button
+                          type='button'
+                          disabled={isOutOfStock}
+                          onClick={() => updateQuantity(item._id, item.color, item.quantity + 1)}
+                          className='w-7 h-7 border border-[#e5e5e5] flex items-center justify-center text-[#555] hover:border-[#111] transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-30 text-sm'
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => updateQuantity(item._id, item.color, 0)}
+                        className='text-[11px] text-[#bbb] hover:text-[#e02020] transition-colors cursor-pointer uppercase tracking-[0.1em]'
+                        aria-label='Supprimer'
+                      >
+                        Retirer
+                      </button>
                     </div>
                   </div>
+
+                  {/* Line total */}
+                  <div className='flex-shrink-0 text-right'>
+                    <p className='text-[13px] font-semibold text-[#111]'>
+                      {(displayPrice * item.quantity).toFixed(2)}{currency}
+                    </p>
+                  </div>
                 </div>
-                <input
-                  value={item.quantity}
-                  onChange={(e) => {
-                    if (isOutOfStock) return;
-                    const v = e.target.value;
-                    if (v === '') return;
-                    const num = parseInt(v, 10);
-                    if (!isNaN(num) && num >= 0) updateQuantity(item._id, item.color, num);
-                  }}
-                  disabled={isOutOfStock}
-                  className='border border-gray-300 rounded max-w-10 sm:max-w-20 px-1 sm:px-2 py-1 focus:ring-2 focus:ring-gray-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed'
-                  type="number"
-                  min={1}
-                />
-                <img onClick={() => updateQuantity(item._id, item.color, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer hover:opacity-70' src={assets.bin_icon} alt="Supprimer" title="Retirer du panier" />
-              </div>
-            )
-          })
-        )}
-      </div>
-
-      <div className='flex justify-end my-20'>
-        <div className='w-full sm:w-[450px]'>
-          <CartTotal />
-          <div className=' w-full text-end'>
-            <button
-              onClick={() => {
-                if (token || localStorage.getItem('token')) {
-                  navigate('/place-order')
-                } else {
-                  setShowCheckoutModal(true)
-                }
-              }}
-              disabled={validCartCount === 0}
-              className='bg-black text-white text-sm my-8 px-8 py-3 rounded focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed'
-            >
-              PASSER COMMANDE
-            </button>
+              )
+            })}
           </div>
-          <CheckoutAuthModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} />
-        </div>
-      </div>
 
+          {/* Order summary */}
+          <div className='lg:w-80 flex-shrink-0'>
+            <div className='border border-[#e5e5e5] p-6'>
+              <p className='text-[11px] font-semibold uppercase tracking-[0.15em] text-[#111] mb-5'>Résumé de commande</p>
+              <CartTotal />
+              <button
+                onClick={() => {
+                  if (token || localStorage.getItem('token')) {
+                    navigate('/place-order')
+                  } else {
+                    setShowCheckoutModal(true)
+                  }
+                }}
+                disabled={validCartCount === 0}
+                className='btn-primary w-full mt-5'
+              >
+                Passer commande
+              </button>
+              <Link
+                to='/collection'
+                className='mt-3 block text-center text-[11px] text-[#888] hover:text-[#111] transition-colors uppercase tracking-[0.1em]'
+              >
+                Continuer mes achats
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CheckoutAuthModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} />
     </div>
   )
 }
