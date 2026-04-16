@@ -57,12 +57,37 @@ const newsletterSubscribeLimiter = rateLimit({
 })
 app.use('/api/newsletter/subscribe', newsletterSubscribeLimiter)
 
-// Security: CORS - restrict to allowed origins
+const PRODUCTION_ORIGINS = [
+    'https://elite-admin-one.vercel.app',
+    'https://elite-ecru-alpha.vercel.app'
+]
+
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true
+
+    // allow localhost via your existing config
+    const allowed = getCorsOrigins()
+    if (allowed.includes(origin)) return true
+
+    // allow all Vercel preview + production deployments
+    if (origin.endsWith('.vercel.app')) return true
+
+    // fallback production whitelist
+    if (PRODUCTION_ORIGINS.includes(origin)) return true
+
+    return false
+}
+
 app.use(cors({
-    origin: getCorsOrigins(),
+    origin: function (origin, callback) {
+        if (isAllowedOrigin(origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error(`CORS blocked for origin: ${origin}`))
+        }
+    },
     credentials: true
 }))
-
 // Logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 
