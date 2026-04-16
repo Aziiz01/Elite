@@ -1,5 +1,5 @@
 import express from 'express'
-import { placeOrder, placeGuestOrder, trackGuestOrder, allOrders, userOrders, updateStatus } from '../controllers/orderController.js'
+import { placeOrder, placeGuestOrder, trackGuestOrder, trackGuestOrdersByEmail, allOrders, userOrders, updateStatus } from '../controllers/orderController.js'
 import adminAuth  from '../middleware/adminAuth.js'
 import authUser from '../middleware/auth.js'
 
@@ -13,6 +13,7 @@ orderRouter.post('/status',adminAuth,updateStatus)
 orderRouter.post('/place',authUser,placeOrder)
 orderRouter.post('/place-guest', placeGuestOrder)
 orderRouter.post('/track-guest', trackGuestOrder)
+orderRouter.post('/track-by-email', trackGuestOrdersByEmail)
 
 // User Feature
 orderRouter.post('/userorders',authUser,userOrders)

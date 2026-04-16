@@ -1,7 +1,9 @@
+import crypto from "crypto";
 import validator from "validator";
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
 import userModel from "../models/userModel.js";
+import { sendPasswordResetEmail } from "../services/mailService.js";
 
 
 const createToken = (id) => {
@@ -258,4 +260,74 @@ const adminLogin = async (req, res) => {
 }
 
 
-export { loginUser, registerUser, getUserProfile, updateProfile, adminLogin, listUsers, updateUser, removeUser }
+// Request password reset — generates token, sends email
+const requestPasswordReset = async (req, res) => {
+    try {
+        const { email } = req.body
+        if (!email || !validator.isEmail(String(email))) {
+            return res.json({ success: false, message: "Adresse e-mail invalide." })
+        }
+        const user = await userModel.findOne({ email: String(email).toLowerCase().trim() })
+        // Always return success to avoid user enumeration
+        if (!user) {
+            return res.json({ success: true, message: "Si un compte existe, un e-mail a été envoyé." })
+        }
+
+        // Generate a secure random token; store its SHA-256 hash
+        const rawToken = crypto.randomBytes(32).toString("hex")
+        const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex")
+        const expiry = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+        user.resetToken = hashedToken
+        user.resetTokenExpiry = expiry
+        await user.save()
+
+        const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "")
+        const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`
+        const customerName = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Cliente"
+
+        sendPasswordResetEmail({ to: user.email, customerName, resetUrl })
+            .catch((err) => console.error("Password reset email failed:", err))
+
+        return res.json({ success: true, message: "Si un compte existe, un e-mail a été envoyé." })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// Reset password — verifies token, sets new password
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body
+        if (!token || !newPassword) {
+            return res.json({ success: false, message: "Token et nouveau mot de passe requis." })
+        }
+        if (newPassword.length < 8) {
+            return res.json({ success: false, message: "Le mot de passe doit contenir au moins 8 caractères." })
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(String(token)).digest("hex")
+        const user = await userModel.findOne({
+            resetToken: hashedToken,
+            resetTokenExpiry: { $gt: new Date() }
+        })
+
+        if (!user) {
+            return res.json({ success: false, message: "Lien invalide ou expiré. Veuillez refaire une demande." })
+        }
+
+        const salt = await bcrypt.genSalt(10)
+        user.password = await bcrypt.hash(newPassword, salt)
+        user.resetToken = null
+        user.resetTokenExpiry = null
+        await user.save()
+
+        res.json({ success: true, message: "Mot de passe mis à jour avec succès." })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { loginUser, registerUser, getUserProfile, updateProfile, adminLogin, listUsers, updateUser, removeUser, requestPasswordReset, resetPassword }

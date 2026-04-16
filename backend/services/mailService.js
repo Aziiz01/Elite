@@ -7,6 +7,7 @@ import {
 } from "../utils/emailTemplates/orderStatusUpdate.js";
 import { getPriceDropEmailTemplate } from "../utils/emailTemplates/priceDropNotification.js";
 import { getNewsletterWelcomeTemplate } from "../utils/emailTemplates/newsletterWelcome.js";
+import { getPasswordResetTemplate } from "../utils/emailTemplates/passwordReset.js";
 
 /**
  * Sends order confirmation email to the customer (full order details)
@@ -230,6 +231,32 @@ ${body || "<p>No content.</p>"}
         return { success: true };
     } catch (error) {
         console.error("Mail: Failed to send newsletter email:", error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Sends password reset email with a secure link
+ */
+export const sendPasswordResetEmail = async ({ to, customerName, resetUrl }) => {
+    if (!to || !String(to).trim()) {
+        return { success: false, error: "Recipient email is required" };
+    }
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn("Mail: SMTP not configured. Skipping password reset email.");
+        return { success: false, error: "SMTP not configured" };
+    }
+    try {
+        const html = getPasswordResetTemplate({ customerName, resetUrl, expiryMinutes: 60 });
+        await transporter.sendMail({
+            from: process.env.MAIL_FROM || `"Elite" <${process.env.SMTP_USER}>`,
+            to: to.trim(),
+            subject: "Réinitialisation de votre mot de passe — Elite",
+            html
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Mail: Failed to send password reset email:", error.message);
         return { success: false, error: error.message };
     }
 };

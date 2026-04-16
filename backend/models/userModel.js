@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema({
     address: { type: String, required: true },
     telephone: { type: String, required: true },
     postalCode: { type: String, required: true },
-    cartData: { type: Object, default: {} }
+    cartData: { type: Object, default: {} },
+    resetToken: { type: String, default: null },
+    resetTokenExpiry: { type: Date, default: null }
 }, { minimize: false })
 
 const userModel = mongoose.models.user || mongoose.model('user',userSchema);

@@ -114,7 +114,7 @@ const placeOrder = async (req,res) => {
             }).catch((err) => console.error("Order confirmation SMS failed:", err));
         }
 
-        res.json({success:true,message:"Order Placed"})
+        res.json({ success: true, message: "Order Placed", orderId: orderIdStr })
 
 
     } catch (error) {
@@ -222,6 +222,30 @@ const trackGuestOrder = async (req, res) => {
     }
 }
 
+// Guest order lookup by email only (no order ID required)
+const trackGuestOrdersByEmail = async (req, res) => {
+    try {
+        const { email } = req.body
+        if (!email || !String(email).trim()) {
+            return res.status(400).json({ success: false, message: "Email requis" })
+        }
+        const normalised = String(email).trim().toLowerCase()
+        const orders = await orderModel
+            .find({ "address.email": { $regex: new RegExp(`^${normalised}$`, "i") } })
+            .lean()
+        const guestOrders = orders.filter((o) => String(o.userId || "").startsWith("guest-"))
+        if (guestOrders.length === 0) {
+            return res.status(404).json({ success: false, message: "Aucune commande trouvée pour cet e-mail." })
+        }
+        // Sort newest first, strip sensitive fields
+        guestOrders.sort((a, b) => new Date(b.date) - new Date(a.date))
+        res.json({ success: true, orders: guestOrders })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+
 // All Orders data for Admin Panel
 const allOrders = async (req,res) => {
 
@@ -295,4 +319,4 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export { placeOrder, placeGuestOrder, trackGuestOrder, allOrders, userOrders, updateStatus }
+export { placeOrder, placeGuestOrder, trackGuestOrder, trackGuestOrdersByEmail, allOrders, userOrders, updateStatus }
